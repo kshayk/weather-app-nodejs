@@ -1,0 +1,67 @@
+<div style="text-align: center">
+  <div class="col-md-3"></div>
+  <div class="col-md-6 content-div" style="margin: auto">
+    <% include partials/header %>
+    <h1><%= title %></h1>
+    <% if (errors) { %>
+      <div class="alert alert-warning">
+        <ul>
+        <% errors.forEach((error) => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+        </ul>
+      </div>
+    <% } %>
+    <form method="post" class="form-inline" id="addressForm" action="/address/search">
+      <label class="sr-only" for="addressInput">address: </label>
+      <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+        <div class="input-group-addon"><i class="fa fa-home"></i></div>
+        <input class="form-control" id="addressInput" type="text" name="address" placeholder="Address" value="<%= form_parameters.address %>" required>
+      </div>
+      <label for="cityInput" class="sr-only">city: </label>
+      <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+        <div class="input-group-addon"><img src="/resources/images/10486-200.png" width="15" height="16"></img></div>
+        <input id="cityInput" class="form-control" type="text" name="city" value="<%= form_parameters.city %>" placeholder="City" required>
+      </div>
+      <label for="countryInput" class="sr-only">country:</label>
+      <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+        <div class="input-group-addon"><i class="fa fa-globe"></i></div>
+        <input class="form-control" id="countryInput" type="text" name="country" placeholder="Country" value="<%= form_parameters.country %>" required>
+      </div>
+      <% if(previous_searches.length !== 0) { %>
+        <input type="hidden" value="<%= JSON.stringify(previous_searches) %>" name="existing_addresses">
+      <% } %>
+      <input class="btn btn-success" type="submit" value="Submit">
+    </form>
+
+    <% if(weather_obj !== null) { %>
+        <div class="well">Temperature (celsius): <%= Math.round(weather_obj.temperature) %>° | Clouds: <%= weather_obj.clouds %> | humidity: <%= weather_obj.humidity_percent %>% | Wind speed: <%= Math.round(weather_obj.wind) %>km/h</div>
+    <% } %>
+
+    <% if(google_success) { %>
+      <iframe
+        width="600"
+        height="400"
+        frameborder="0" style="border:0"
+        src="https://www.google.com/maps/embed/v1/search?key=AIzaSyD-02M0GmqwiCh-3_WpjY7ai6St6-P5EM8&q=<%= form_parameters.formatted_address %>" allowfullscreen>
+      </iframe>
+    <% } %>
+
+    <% if (previous_searches.length !== 0) { %>
+      <h4>Previous search results</h4>
+      <table class="table table-striped" border="2px solid black">
+      <tr><th>Address</th><th>city</th><th>Country</th><th>Actions</th></tr>
+      <% previous_searches.forEach((previous_search) => { %>
+        <tr>
+          <td><%= previous_search.address %></td>
+          <td><%= previous_search.city %></td>
+          <td><%= previous_search.country %></td>
+          <td><a href="#" class="deleteSearch" data-id="<%= previous_search._id %>">delete</a></td>
+        </tr>
+      <% }) %>
+    </table>
+    <% } %>
+    <% include partials/footer %>
+  </div>
+  <div class="col-md-3"></div>
+</div>
