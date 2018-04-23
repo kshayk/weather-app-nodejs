@@ -1,5 +1,7 @@
 $(document).ready(function() {
   $('.deleteSearch').on('click', deleteUser);
+
+  $('.UseSearch').on('click', searchAgain);
 });
 
 function deleteUser() {
@@ -17,4 +19,16 @@ function deleteUser() {
   } else {
     return false;
   }
+};
+
+function searchAgain() {
+    var address = $(this).data('address');
+    var city = $(this).data('city');
+    var country = $(this).data('country');
+
+    $('#addressInput').val(address);
+    $('#cityInput').val(city);
+    $('#countryInput').val(country);
+
+    $('#addressForm').submit();
 }

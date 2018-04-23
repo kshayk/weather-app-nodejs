@@ -56,7 +56,7 @@
           <td><%= previous_search.address %></td>
           <td><%= previous_search.city %></td>
           <td><%= previous_search.country %></td>
-          <td><a href="#" class="deleteSearch" data-id="<%= previous_search._id %>">delete</a></td>
+          <td><a href="#" class="deleteSearch" data-id="<%= previous_search._id %>">delete</a> | <a href='#' class="UseSearch" data-address="<%= previous_search.address %>" data-city="<%= previous_search.city %>" data-country="<%= previous_search.country %>">Use</a></td>
         </tr>
       <% }) %>
     </table>
