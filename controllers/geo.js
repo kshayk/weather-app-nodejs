@@ -96,7 +96,6 @@ class Geo {
                           url: proximate_weather_url,
                           json: true
                       }, (w2_error, w2_response, w2_body) => {
-                          console.log(w2_body);
                           if(w2_error) {
                               var request_error_array = [
                                 {
@@ -109,6 +108,7 @@ class Geo {
                               this.renderError(request_error_array, form_parameters, res);
                           } else {
                               var proximate_weather_array = [];
+                              var min_temp = null;
 
                               var weather_data = w2_body.daily.data;
 
@@ -117,13 +117,23 @@ class Geo {
                                   d.setUTCSeconds(weather_data[i].time);
                                   var celcius_temp = (weather_data[i].temperatureHigh - 32) * 0.5556;
 
+                                  if(min_temp === null) {
+                                      min_temp = celcius_temp;
+                                  } else {
+                                      if(celcius_temp < min_temp) {
+                                          min_temp = celcius_temp;
+                                      }
+                                  }
+
                                   var day_obj = {
                                       day: weekdays[d.getDay()],
-                                      temperature: celcius_temp
+                                      temperature: Math.round(celcius_temp)
                                   };
 
                                   proximate_weather_array.push(day_obj);
                               }
+
+                              proximate_weather_array.push({temp: min_temp-1});
 
                               if(w_error !== null) {
                                 var request_error_array = [

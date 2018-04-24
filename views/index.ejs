@@ -101,7 +101,8 @@
                     borderColor: [
                         'rgba(255,99,132,1)'
                     ],
-                    borderWidth: 1
+                    borderWidth: 1,
+                    lineTension: 0
                 }]
             },
             options: {
@@ -111,7 +112,7 @@
                             display:false
                         },
                         ticks: {
-                            beginAtZero:false
+                            suggestedMin: <%= proximate_weather_array[7].temp %>
                         }
                     }],
                     xAxes: [
