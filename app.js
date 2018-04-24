@@ -3,15 +3,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const Geo = require('./controllers/geo'); //no need for geo.js since this file is with .js extension
-
-const google_api_endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
-const weather_api_endpoint = 'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=f8ce6d274cc4cdbf7d0239e388ecdd56';
+const WeatherController = require('./controllers/geo'); //no need for geo.js since this file is with .js extension
 
 var expressValidator = require('express-validator');
 
 const app = express();
-var geoClass = new Geo();
+var geo = new WeatherController();
 
 var logger = (req, res, next) => {
   console.log('logging....');
@@ -37,6 +34,7 @@ app.use((req, res, next) => {
   res.locals.form_parameters = {};
   res.locals.google_success = false;
   res.locals.weather_obj = null;
+  res.locals.proximate_weather_array = [];
   next();
 })
 
@@ -61,15 +59,15 @@ var middlewareOptions = {
 app.use(expressValidator(middlewareOptions));
 
 app.get('/', (req, res) => {
-    geoClass.getPreviousSearches(res);
+    geo.getPreviousSearches(res);
 });
 
 app.post('/address/search', (req, res) => {
-    geoClass.getWeatherReport(req, res);
+    geo.getWeatherReport(req, res);
 });
 
 app.delete('/search/delete/:id', (req, res) => {
-    geoClass.deletGeoRecord(req, res);
+    geo.deletGeoRecord(req, res);
 });
 
 app.listen(3000, () => {

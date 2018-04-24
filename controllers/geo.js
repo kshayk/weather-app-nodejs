@@ -7,6 +7,16 @@ const user_ip = ip.address();
 
 const google_api_endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
 const weather_api_endpoint = 'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=f8ce6d274cc4cdbf7d0239e388ecdd56';
+const proximate_weather_api_endpoint = 'https://api.darksky.net/forecast/e0f0131ef08a346a7b001a5571034bd5/{lat},{lon}';
+
+var weekdays = [];
+weekdays[0] = "Sunday";
+weekdays[1] = "Monday";
+weekdays[2] = "Tuesday";
+weekdays[3] = "Wednesday";
+weekdays[4] = "Thursday";
+weekdays[5] = "Friday";
+weekdays[6] = "Saturday";
 
 class Geo {
     constructor() {
@@ -79,82 +89,122 @@ class Geo {
                     url: weather_url,
                     json: true
                   }, (w_error, w_response, w_body) => {
-                    if(w_error !== null) {
-                      var request_error_array = [
-                        {
-                          msg: w_error
-                        }
-                      ];
+                      //Now getting the proximate weather report
+                      var proximate_weather_url = proximate_weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
 
-                      this.renderError(request_error_array, form_parameters, res);
-                    } else {
-
-                      var weather_obj = {
-                        temperature: w_body.main.temp - 273.15, //kelvin to celsius
-                        humidity_percent: w_body.main.humidity,
-                        clouds: w_body.weather[0].description,
-                        wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
-                      }
-
-                      var newSearch = {
-                        address,
-                        city,
-                        country,
-                        ip: user_ip
-                      };
-
-                      if(check_query_exists) {
-                        //already has the same address and IP in DB
-                        db.searches.find({ip: user_ip}, (err, docs) => {
-                          form_parameters.formatted_address = body.results[0].formatted_address;
-
-                          res.render('index', {
-                            title: 'Get weather result',
-                            form_parameters,
-                            previous_searches: docs,
-                            google_success: true,
-                            weather_obj
-                          });
-                        });
-                      } else {
-                        //doesnt have the same address and IP. insert it.
-                        db.searches.insert(newSearch, (err, result) => {
-                          if(err) {
+                      request({
+                          url: proximate_weather_url,
+                          json: true
+                      }, (w2_error, w2_response, w2_body) => {
+                          console.log(w2_body);
+                          if(w2_error) {
                               var request_error_array = [
                                 {
-                                  msg: 'Failed to save your search. Try again later.'
+                                  msg: 'Connection with the weather APIs has failed. try again later'
                                 }
                               ];
 
+                              console.log(w2_error);
+
                               this.renderError(request_error_array, form_parameters, res);
-                          }
+                          } else {
+                              var proximate_weather_array = [];
 
-                          db.searches.find({ip: user_ip}, (err, docs) => {
-                              if(err) {
-                                  var request_error_array = [
-                                    {
-                                      msg: 'Failed to get your previous searches. Try again later.'
-                                    }
-                                  ];
+                              var weather_data = w2_body.daily.data;
 
-                                  this.renderError(request_error_array, form_parameters, res);
+                              for(var i = 1; i <= weather_data.length-1; i++) {
+                                  var d = new Date(0);
+                                  d.setUTCSeconds(weather_data[i].time);
+                                  var celcius_temp = (weather_data[i].temperatureHigh - 32) * 0.5556;
+
+                                  var day_obj = {
+                                      day: weekdays[d.getDay()],
+                                      temperature: celcius_temp
+                                  };
+
+                                  proximate_weather_array.push(day_obj);
                               }
 
-                              form_parameters.formatted_address = body.results[0].formatted_address;
+                              if(w_error !== null) {
+                                var request_error_array = [
+                                  {
+                                    msg: w_error
+                                  }
+                                ];
 
-                              res.render('index', {
-                                title: 'Get weather result',
-                                form_parameters,
-                                previous_searches: docs,
-                                google_success: true,
-                                weather_obj
-                              });
-                          });
-                        });
-                      }
+                                this.renderError(request_error_array, form_parameters, res);
+                              } else {
 
-                      console.log('success');
-                    }
+                                var weather_obj = {
+                                  temperature: w_body.main.temp - 273.15, //kelvin to celsius
+                                  humidity_percent: w_body.main.humidity,
+                                  clouds: w_body.weather[0].description,
+                                  wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
+                                }
+
+                                var newSearch = {
+                                  address,
+                                  city,
+                                  country,
+                                  ip: user_ip
+                                };
+
+                                if(check_query_exists) {
+                                  //already has the same address and IP in DB
+                                  db.searches.find({ip: user_ip}, (err, docs) => {
+                                    form_parameters.formatted_address = body.results[0].formatted_address;
+
+                                    res.render('index', {
+                                      title: 'Get weather result',
+                                      form_parameters,
+                                      previous_searches: docs,
+                                      google_success: true,
+                                      weather_obj,
+                                      proximate_weather_array
+                                    });
+                                  });
+                                } else {
+                                  //doesnt have the same address and IP. insert it.
+                                  db.searches.insert(newSearch, (err, result) => {
+                                    if(err) {
+                                        var request_error_array = [
+                                          {
+                                            msg: 'Failed to save your search. Try again later.'
+                                          }
+                                        ];
+
+                                        this.renderError(request_error_array, form_parameters, res);
+                                    }
+
+                                    db.searches.find({ip: user_ip}, (err, docs) => {
+                                        if(err) {
+                                            var request_error_array = [
+                                              {
+                                                msg: 'Failed to get your previous searches. Try again later.'
+                                              }
+                                            ];
+
+                                            this.renderError(request_error_array, form_parameters, res);
+                                        }
+
+                                        form_parameters.formatted_address = body.results[0].formatted_address;
+
+                                        res.render('index', {
+                                          title: 'Get weather result',
+                                          form_parameters,
+                                          previous_searches: docs,
+                                          google_success: true,
+                                          weather_obj,
+                                          proximate_weather_array
+                                        });
+                                    });
+                                  });
+                                }
+
+                                console.log('success');
+                              }
+                          }
+                      });
                   });
                 }
               }
@@ -185,18 +235,19 @@ class Geo {
         return false;
     }
 
-    renderError(errors, form_parameters, res) {
+    renderError(errors, form_parameters, res, proximate_weather_array) {
         db.searches.find({ip: user_ip}, (err, docs) => {
           res.render('index', {
             title: 'Get weather result',
             errors,
             form_parameters,
-            previous_searches: docs
+            previous_searches: docs,
+            proximate_weather_array
           });
         });
     }
 
-    getPreviousSearches(res) {
+    getPreviousSearches(res, callback) {
         //fetching users from users table
         db.searches.find({ip: user_ip}, (err, docs) =>{
             res.render('index', {

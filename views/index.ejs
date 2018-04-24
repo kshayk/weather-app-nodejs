@@ -38,6 +38,10 @@
         <div class="well">Temperature (celsius): <%= Math.round(weather_obj.temperature) %>° | Clouds: <%= weather_obj.clouds %> | humidity: <%= weather_obj.humidity_percent %>% | Wind speed: <%= Math.round(weather_obj.wind) %>km/h</div>
     <% } %>
 
+    <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
+        <canvas id="myChart" width="400" height="400"></canvas>
+    <% } %>
+
     <% if(google_success) { %>
       <iframe
         width="600"
@@ -63,5 +67,64 @@
     <% } %>
     <% include partials/footer %>
   </div>
+
+  <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
+      <script>
+        var ctx = document.getElementById("myChart").getContext('2d');
+        document.getElementById("myChart").height = 100;
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [
+                    "<%= proximate_weather_array[0].day %>",
+                    "<%= proximate_weather_array[1].day %>",
+                    "<%= proximate_weather_array[2].day %>",
+                    "<%= proximate_weather_array[3].day %>",
+                    "<%= proximate_weather_array[4].day %>",
+                    "<%= proximate_weather_array[5].day %>",
+                    "<%= proximate_weather_array[6].day %>"
+                ],
+                datasets: [{
+                    label: `Temperature`,
+                    data: [
+                        "<%= proximate_weather_array[0].temperature %>",
+                        "<%= proximate_weather_array[1].temperature %>",
+                        "<%= proximate_weather_array[2].temperature %>",
+                        "<%= proximate_weather_array[3].temperature %>",
+                        "<%= proximate_weather_array[4].temperature %>",
+                        "<%= proximate_weather_array[5].temperature %>",
+                        "<%= proximate_weather_array[6].temperature %>"
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        gridLines: {
+                            display:false
+                        },
+                        ticks: {
+                            beginAtZero:false
+                        }
+                    }],
+                    xAxes: [
+                        {
+                            gridLines: {
+                                display:false
+                            },
+                        }
+                    ]
+                }
+            }
+        });
+      </script>
+  <% } %>
   <div class="col-md-3"></div>
 </div>
