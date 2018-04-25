@@ -2,6 +2,31 @@ $(document).ready(function() {
   $('.deleteSearch').on('click', deleteUser);
 
   $('.UseSearch').on('click', searchAgain);
+
+  $('#hourChart').hide();
+
+  $('#daily-button').on('click', function() {
+      if($('#dailyButtonLabel').hasClass('btn-success')) {
+          console.log('clicked1');
+          return;
+      }
+
+      $('#dailyButtonLabel').attr('class', 'btn btn-success');
+      $('#hourlyButtonLabel').attr('class', 'btn btn-default');
+      $('#dayChart').show();
+      $('#hourChart').hide();
+  });
+
+  $('#hourly-button').on('click', function() {
+      if($('#hourlyButtonLabel').hasClass('btn-success')) {
+          return;
+      }
+
+      $('#hourlyButtonLabel').attr('class', 'btn btn-success');
+      $('#dailyButtonLabel').attr('class', 'btn btn-default');
+      $('#hourChart').show();
+      $('#dayChart').hide();
+  });
 });
 
 function deleteUser() {

@@ -38,8 +38,23 @@
         <div class="well">Temperature (celsius): <%= Math.round(weather_obj.temperature) %>° | Clouds: <%= weather_obj.clouds %> | humidity: <%= weather_obj.humidity_percent %>% | Wind speed: <%= Math.round(weather_obj.wind) %>km/h</div>
     <% } %>
 
+    <% if((typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) && (typeof proximate_weather_hourly_array !== 'undefined' && proximate_weather_hourly_array.length !== 0)) { %>
+        <div class="btn-group" data-toggle="buttons">
+              <label class="btn btn-success" id="dailyButtonLabel">
+                <input type="radio" name="daily-button" id="daily-button"> Daily
+              </label>
+              <label class="btn btn-default" id="hourlyButtonLabel">
+                <input type="radio" name="hourly-button" id="hourly-button"> Hourly
+              </label>
+        </div>
+    <% } %>
+
     <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
-        <canvas id="myChart" width="400" height="400"></canvas>
+        <canvas id="dayChart" width="400" height="400"></canvas>
+    <% } %>
+
+    <% if(typeof proximate_weather_hourly_array !== 'undefined' && proximate_weather_hourly_array.length !== 0) { %>
+        <canvas id="hourChart" width="400" height="400"></canvas>
     <% } %>
 
     <% if(google_success) { %>
@@ -70,7 +85,7 @@
 
   <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
       <script>
-        var ctx = document.getElementById("myChart").getContext('2d');
+        var ctx = document.getElementById("dayChart").getContext('2d');
 
         var gradientStroke = ctx.createLinearGradient(0, 0, 900, 0);
         gradientStroke.addColorStop(0.1, 'rgba(<%= proximate_weather_array[8][0] %>)');
@@ -90,8 +105,8 @@
         gradientFill.addColorStop(0.8, 'rgba(<%= proximate_weather_array[8][5] %>,0.6)');
         gradientFill.addColorStop(1, 'rgba(<%= proximate_weather_array[8][6] %>,0.6)');
 
-        document.getElementById("myChart").height = 100;
-        var myChart = new Chart(ctx, {
+        document.getElementById("dayChart").height = 100;
+        var dayChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [
@@ -109,9 +124,9 @@
                     pointBackgroundColor: gradientStroke,
                     pointHoverBackgroundColor: gradientStroke,
                     pointHoverBorderColor: gradientStroke,
-                    pointBorderWidth: 10,
-                    pointHoverRadius: 10,
-                    pointHoverBorderWidth: 1,
+                    pointBorderWidth: 5,
+                    pointHoverRadius: 5,
+                    pointHoverBorderWidth: 2,
                     pointRadius: 2,
                     fill: true,
                     backgroundColor: gradientFill,
@@ -142,6 +157,99 @@
                         ticks: {
                             suggestedMin: <%= proximate_weather_array[7].min_temp %>,
                             suggestedMax: <%= proximate_weather_array[7].max_temp %>
+                        }
+                    }],
+                    xAxes: [
+                        {
+                            gridLines: {
+                                offsetGridLines: true
+                            },
+                        }
+                    ]
+                }
+            }
+        });
+      </script>
+  <% } %>
+
+  <% if(typeof proximate_weather_hourly_array !== 'undefined' && proximate_weather_hourly_array.length !== 0) { %>
+      <script>
+        var ctx2 = document.getElementById("hourChart").getContext('2d');
+
+        var gradientStroke2 = ctx2.createLinearGradient(0, 0, 900, 0);
+        gradientStroke2.addColorStop(0.1, 'rgba(<%= proximate_weather_hourly_array[9][0] %>)');
+        gradientStroke2.addColorStop(0.2, 'rgba(<%= proximate_weather_hourly_array[9][1] %>)');
+        gradientStroke2.addColorStop(0.35, 'rgba(<%= proximate_weather_hourly_array[9][2] %>)');
+        gradientStroke2.addColorStop(0.5, 'rgba(<%= proximate_weather_hourly_array[9][3] %>)');
+        gradientStroke2.addColorStop(0.6, 'rgba(<%= proximate_weather_hourly_array[9][4] %>)');
+        gradientStroke2.addColorStop(0.75, 'rgba(<%= proximate_weather_hourly_array[9][5] %>)');
+        gradientStroke2.addColorStop(0.85, 'rgba(<%= proximate_weather_hourly_array[9][6] %>)');
+        gradientStroke2.addColorStop(1, 'rgba(<%= proximate_weather_hourly_array[9][7] %>)');
+
+        var gradientFill2 = ctx2.createLinearGradient(0, 0, 900, 0);
+        gradientFill2.addColorStop(0.1, 'rgba(<%= proximate_weather_hourly_array[9][0] %>,0.6)');
+        gradientFill2.addColorStop(0.2, 'rgba(<%= proximate_weather_hourly_array[9][1] %>,0.6)');
+        gradientFill2.addColorStop(0.35, 'rgba(<%= proximate_weather_hourly_array[9][2] %>,0.6)');
+        gradientFill2.addColorStop(0.5, 'rgba(<%= proximate_weather_hourly_array[9][3] %>,0.6)');
+        gradientFill2.addColorStop(0.6, 'rgba(<%= proximate_weather_hourly_array[9][4] %>,0.6)');
+        gradientFill2.addColorStop(0.75, 'rgba(<%= proximate_weather_hourly_array[9][5] %>,0.6)');
+        gradientFill2.addColorStop(0.85, 'rgba(<%= proximate_weather_hourly_array[9][6] %>,0.6)');
+        gradientFill2.addColorStop(1, 'rgba(<%= proximate_weather_hourly_array[9][7] %>,0.6)');
+
+        document.getElementById("hourChart").height = 100;
+        var hourChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: [
+                    "<%= proximate_weather_hourly_array[0].hour %>",
+                    "<%= proximate_weather_hourly_array[1].hour %>",
+                    "<%= proximate_weather_hourly_array[2].hour %>",
+                    "<%= proximate_weather_hourly_array[3].hour %>",
+                    "<%= proximate_weather_hourly_array[4].hour %>",
+                    "<%= proximate_weather_hourly_array[5].hour %>",
+                    "<%= proximate_weather_hourly_array[6].hour %>",
+                    "<%= proximate_weather_hourly_array[7].hour %>",
+                ],
+                datasets: [{
+                    borderColor: gradientStroke2,
+                    pointBorderColor: gradientStroke2,
+                    pointBackgroundColor: gradientStroke2,
+                    pointHoverBackgroundColor: gradientStroke2,
+                    pointHoverBorderColor: gradientStroke2,
+                    pointBorderWidth: 5,
+                    pointHoverRadius: 5,
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 2,
+                    fill: true,
+                    backgroundColor: gradientFill2,
+                    borderWidth: 4,
+                    label: `Temperature`,
+                    data: [
+                        "<%= proximate_weather_hourly_array[0].temperature %>",
+                        "<%= proximate_weather_hourly_array[1].temperature %>",
+                        "<%= proximate_weather_hourly_array[2].temperature %>",
+                        "<%= proximate_weather_hourly_array[3].temperature %>",
+                        "<%= proximate_weather_hourly_array[4].temperature %>",
+                        "<%= proximate_weather_hourly_array[5].temperature %>",
+                        "<%= proximate_weather_hourly_array[6].temperature %>",
+                        "<%= proximate_weather_hourly_array[7].temperature %>"
+                    ],
+                    borderWidth: 1,
+                    lineTension: 0
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                scales: {
+                    yAxes: [{
+                        gridLines: {
+                            display:false
+                        },
+                        ticks: {
+                            suggestedMin: <%= proximate_weather_hourly_array[8].min_temp %>,
+                            suggestedMax: <%= proximate_weather_hourly_array[8].max_temp %>
                         }
                     }],
                     xAxes: [

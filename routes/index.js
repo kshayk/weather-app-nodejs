@@ -7,6 +7,7 @@ module.exports = (app, geo, bodyParser, expressValidator) => {
       res.locals.google_success = false;
       res.locals.weather_obj = null;
       res.locals.proximate_weather_array = [];
+      res.locals.proximate_weather_hourly_array = [];
       next();
     });
 
