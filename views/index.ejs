@@ -72,7 +72,7 @@
       <script>
         var ctx = document.getElementById("myChart").getContext('2d');
 
-        var gradientStroke = ctx.createLinearGradient(0, 0, 900, 230);
+        var gradientStroke = ctx.createLinearGradient(0, 0, 900, 0);
         gradientStroke.addColorStop(0.1, 'rgba(<%= proximate_weather_array[8][0] %>)');
         gradientStroke.addColorStop(0.2, 'rgba(<%= proximate_weather_array[8][1] %>)');
         gradientStroke.addColorStop(0.35, 'rgba(<%= proximate_weather_array[8][2] %>)');
@@ -81,7 +81,7 @@
         gradientStroke.addColorStop(0.8, 'rgba(<%= proximate_weather_array[8][5] %>)');
         gradientStroke.addColorStop(1, 'rgba(<%= proximate_weather_array[8][6] %>)');
 
-        var gradientFill = ctx.createLinearGradient(0, 0, 900, 230);
+        var gradientFill = ctx.createLinearGradient(0, 0, 900, 0);
         gradientFill.addColorStop(0.1, 'rgba(<%= proximate_weather_array[8][0] %>,0.6)');
         gradientFill.addColorStop(0.2, 'rgba(<%= proximate_weather_array[8][1] %>,0.6)');
         gradientFill.addColorStop(0.35, 'rgba(<%= proximate_weather_array[8][2] %>,0.6)');

@@ -9,7 +9,8 @@ const google_api_endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?a
 const weather_api_endpoint = 'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=f8ce6d274cc4cdbf7d0239e388ecdd56';
 const proximate_weather_api_endpoint = 'https://api.darksky.net/forecast/e0f0131ef08a346a7b001a5571034bd5/{lat},{lon}';
 
-const red_rgb = '255,102,102';
+const light_red_rgb = '255,102,102';
+const strong_red_rgb = '255,26,26';
 const blue_rgb = '153,153,255';
 
 var weekdays = [];
@@ -124,8 +125,10 @@ class Geo {
 
                                   if(celcius_temp < 20) {
                                       gradient_colors.push(blue_rgb);
+                                  } else if(celcius_temp > 20 && celcius_temp < 30) {
+                                      gradient_colors.push(light_red_rgb);
                                   } else {
-                                      gradient_colors.push(red_rgb);
+                                      gradient_colors.push(strong_red_rgb);
                                   }
 
                                   if(min_temp === null) {
