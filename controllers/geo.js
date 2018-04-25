@@ -9,6 +9,9 @@ const google_api_endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?a
 const weather_api_endpoint = 'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=f8ce6d274cc4cdbf7d0239e388ecdd56';
 const proximate_weather_api_endpoint = 'https://api.darksky.net/forecast/e0f0131ef08a346a7b001a5571034bd5/{lat},{lon}';
 
+const red_rgb = '255,102,102';
+const blue_rgb = '153,153,255';
+
 var weekdays = [];
 weekdays[0] = "Sunday";
 weekdays[1] = "Monday";
@@ -108,7 +111,9 @@ class Geo {
                               this.renderError(request_error_array, form_parameters, res);
                           } else {
                               var proximate_weather_array = [];
+                              var gradient_colors = [];
                               var min_temp = null;
+                              var max_temp = null;
 
                               var weather_data = w2_body.daily.data;
 
@@ -117,11 +122,22 @@ class Geo {
                                   d.setUTCSeconds(weather_data[i].time);
                                   var celcius_temp = (weather_data[i].temperatureHigh - 32) * 0.5556;
 
+                                  if(celcius_temp < 20) {
+                                      gradient_colors.push(blue_rgb);
+                                  } else {
+                                      gradient_colors.push(red_rgb);
+                                  }
+
                                   if(min_temp === null) {
                                       min_temp = celcius_temp;
+                                      max_temp = celcius_temp;
                                   } else {
                                       if(celcius_temp < min_temp) {
                                           min_temp = celcius_temp;
+                                      }
+
+                                      if(max_temp === null || celcius_temp > max_temp) {
+                                          max_temp = celcius_temp;
                                       }
                                   }
 
@@ -133,7 +149,8 @@ class Geo {
                                   proximate_weather_array.push(day_obj);
                               }
 
-                              proximate_weather_array.push({temp: min_temp-1});
+                              proximate_weather_array.push({min_temp: min_temp-1, max_temp: max_temp+1});
+                              proximate_weather_array.push(gradient_colors);
 
                               if(w_error !== null) {
                                 var request_error_array = [

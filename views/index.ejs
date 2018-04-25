@@ -71,6 +71,25 @@
   <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
       <script>
         var ctx = document.getElementById("myChart").getContext('2d');
+
+        var gradientStroke = ctx.createLinearGradient(0, 0, 900, 230);
+        gradientStroke.addColorStop(0.1, 'rgba(<%= proximate_weather_array[8][0] %>)');
+        gradientStroke.addColorStop(0.2, 'rgba(<%= proximate_weather_array[8][1] %>)');
+        gradientStroke.addColorStop(0.35, 'rgba(<%= proximate_weather_array[8][2] %>)');
+        gradientStroke.addColorStop(0.5, 'rgba(<%= proximate_weather_array[8][3] %>)');
+        gradientStroke.addColorStop(0.6, 'rgba(<%= proximate_weather_array[8][4] %>)');
+        gradientStroke.addColorStop(0.8, 'rgba(<%= proximate_weather_array[8][5] %>)');
+        gradientStroke.addColorStop(1, 'rgba(<%= proximate_weather_array[8][6] %>)');
+
+        var gradientFill = ctx.createLinearGradient(0, 0, 900, 230);
+        gradientFill.addColorStop(0.1, 'rgba(<%= proximate_weather_array[8][0] %>,0.6)');
+        gradientFill.addColorStop(0.2, 'rgba(<%= proximate_weather_array[8][1] %>,0.6)');
+        gradientFill.addColorStop(0.35, 'rgba(<%= proximate_weather_array[8][2] %>,0.6)');
+        gradientFill.addColorStop(0.5, 'rgba(<%= proximate_weather_array[8][3] %>,0.6)');
+        gradientFill.addColorStop(0.6, 'rgba(<%= proximate_weather_array[8][4] %>,0.6)');
+        gradientFill.addColorStop(0.8, 'rgba(<%= proximate_weather_array[8][5] %>,0.6)');
+        gradientFill.addColorStop(1, 'rgba(<%= proximate_weather_array[8][6] %>,0.6)');
+
         document.getElementById("myChart").height = 100;
         var myChart = new Chart(ctx, {
             type: 'line',
@@ -85,6 +104,18 @@
                     "<%= proximate_weather_array[6].day %>"
                 ],
                 datasets: [{
+                    borderColor: gradientStroke,
+                    pointBorderColor: gradientStroke,
+                    pointBackgroundColor: gradientStroke,
+                    pointHoverBackgroundColor: gradientStroke,
+                    pointHoverBorderColor: gradientStroke,
+                    pointBorderWidth: 10,
+                    pointHoverRadius: 10,
+                    pointHoverBorderWidth: 1,
+                    pointRadius: 2,
+                    fill: true,
+                    backgroundColor: gradientFill,
+                    borderWidth: 4,
                     label: `Temperature`,
                     data: [
                         "<%= proximate_weather_array[0].temperature %>",
@@ -95,30 +126,28 @@
                         "<%= proximate_weather_array[5].temperature %>",
                         "<%= proximate_weather_array[6].temperature %>"
                     ],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255,99,132,1)'
-                    ],
                     borderWidth: 1,
                     lineTension: 0
                 }]
             },
             options: {
+                legend: {
+                    display: false
+                },
                 scales: {
                     yAxes: [{
                         gridLines: {
                             display:false
                         },
                         ticks: {
-                            suggestedMin: <%= proximate_weather_array[7].temp %>
+                            suggestedMin: <%= proximate_weather_array[7].min_temp %>,
+                            suggestedMax: <%= proximate_weather_array[7].max_temp %>
                         }
                     }],
                     xAxes: [
                         {
                             gridLines: {
-                                display:false
+                                offsetGridLines: true
                             },
                         }
                     ]
