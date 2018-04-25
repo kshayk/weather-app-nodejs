@@ -2,11 +2,12 @@ const request = require('request');
 const ip = require('ip');
 const mongojs = require('mongojs');
 const db = mongojs('address_searches', ['searches']); //specifiyng the database and table(s)
+const api_keys = require('../api_keys');
 const ObjectId = mongojs.ObjectId;
 const user_ip = ip.address();
 
-const google_api_endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
-const weather_api_endpoint = 'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=f8ce6d274cc4cdbf7d0239e388ecdd56';
+const google_api_endpoint = `https://maps.googleapis.com/maps/api/geocode/json?key=${api_keys.google_maps_api}&address=`;
+const weather_api_endpoint = `http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=${api_keys.weather_api}`;
 const proximate_weather_api_endpoint = 'https://api.darksky.net/forecast/e0f0131ef08a346a7b001a5571034bd5/{lat},{lon}';
 
 const light_red_rgb = '255,102,102';
