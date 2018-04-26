@@ -8,7 +8,7 @@ const user_ip = ip.address();
 
 const google_api_endpoint = `https://maps.googleapis.com/maps/api/geocode/json?key=${api_keys.google_maps_api}&address=`;
 const weather_api_endpoint = `http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=${api_keys.weather_api}`;
-const proximate_weather_api_endpoint = 'https://api.darksky.net/forecast/e0f0131ef08a346a7b001a5571034bd5/{lat},{lon}';
+const proximate_weather_api_endpoint = `https://api.darksky.net/forecast/${api_keys.darksky_api}/{lat},{lon}`;
 
 const light_red_rgb = '255,102,102';
 const strong_red_rgb = '255,26,26';
@@ -154,7 +154,8 @@ class Geo {
 
                                   var day_obj = {
                                       day: weekdays[d.getDay()],
-                                      temperature: celcius_temp
+                                      temperature: celcius_temp,
+                                      summary: weather_data[i].summary
                                   };
 
                                   proximate_weather_array.push(day_obj);
@@ -210,7 +211,7 @@ class Geo {
                               proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
                               proximate_weather_hourly_array.push(gradient_colors_hourly);
 
-                              console.log(proximate_weather_hourly_array);
+                              console.log(proximate_weather_array);
 
                               if(w_error !== null) {
                                 var request_error_array = [

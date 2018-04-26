@@ -146,6 +146,26 @@
                 }]
             },
             options: {
+                tooltips: {
+                    callbacks: {
+                        title: function(tooltipItem, data) {
+                            var tooltip_index = tooltipItem[0]['index'];
+                            var summaries = [];
+
+                            <% for(var i = 0; i < proximate_weather_array.length; i++) { %>
+                                console.log('sdfsdf');
+                                <% if(typeof proximate_weather_array[i].summary !== 'undefined') { %>
+                                    summaries.push("<%= proximate_weather_array[i].summary %>");
+                                <% } %>
+                            <% } %>
+
+                            return data['labels'][tooltipItem[0]['index']] + ": " + summaries[tooltip_index];
+                        },
+                        label: function(tooltipItem, data) {
+                            return "Temperature: " + data['datasets'][0]['data'][tooltipItem['index']] + "°C";
+                        },
+                    }
+                },
                 legend: {
                     display: false
                 },
@@ -239,6 +259,13 @@
                 }]
             },
             options: {
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            return "Temperature: " + data['datasets'][0]['data'][tooltipItem['index']] + "°C";
+                        },
+                    }
+                },
                 legend: {
                     display: false
                 },
