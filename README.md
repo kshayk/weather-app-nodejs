@@ -1,6 +1,6 @@
 Weather app that will give you the weather based on your given address
 
-Overall preview:
+Overall preview:________
 ![App preview](public/resources/images/weathermap.png)
 
 Daily preview with tooltip:
