@@ -14,6 +14,8 @@ const light_red_rgb = '255,102,102';
 const strong_red_rgb = '255,26,26';
 const blue_rgb = '153,153,255';
 
+const page_title = 'Real Time Weather Report';
+
 var weekdays = [];
 weekdays[0] = "Sunday";
 weekdays[1] = "Monday";
@@ -161,8 +163,6 @@ class Geo {
                               proximate_weather_array.push({min_temp: min_temp-2, max_temp: max_temp+2});
                               proximate_weather_array.push(gradient_colors);
 
-                              console.log(gradient_colors);
-
                               for(var h = 1; h <= 24; h++) {
                                   var d2 = new Date(0);
                                   d2.setUTCSeconds(weather_data_hourly[h].time);
@@ -171,7 +171,7 @@ class Geo {
                                   if((h % 3) === 0 ) {
                                       if(celcius_temp_hourly < 20) {
                                           gradient_colors_hourly.push(blue_rgb);
-                                      } else if(celcius_temp_hourly > 20 && celcius_temp_hourly < 30) {
+                                      } else if(celcius_temp_hourly >= 20 && celcius_temp_hourly < 30) {
                                           gradient_colors_hourly.push(light_red_rgb);
                                       } else {
                                           gradient_colors_hourly.push(strong_red_rgb);
@@ -242,7 +242,7 @@ class Geo {
                                     form_parameters.formatted_address = body.results[0].formatted_address;
 
                                     res.render('index', {
-                                      title: 'Get weather result',
+                                      title: page_title,
                                       form_parameters,
                                       previous_searches: docs,
                                       google_success: true,
@@ -278,7 +278,7 @@ class Geo {
                                         form_parameters.formatted_address = body.results[0].formatted_address;
 
                                         res.render('index', {
-                                          title: 'Get weather result',
+                                          title: page_title,
                                           form_parameters,
                                           previous_searches: docs,
                                           google_success: true,
@@ -288,8 +288,6 @@ class Geo {
                                     });
                                   });
                                 }
-
-                                console.log('success');
                               }
                           }
                       });
@@ -326,7 +324,7 @@ class Geo {
     renderError(errors, form_parameters, res, proximate_weather_array) {
         db.searches.find({ip: user_ip}, (err, docs) => {
           res.render('index', {
-            title: 'Get weather result',
+            title: page_title,
             errors,
             form_parameters,
             previous_searches: docs,
@@ -339,7 +337,7 @@ class Geo {
         //fetching users from users table
         db.searches.find({ip: user_ip}, (err, docs) =>{
             res.render('index', {
-              title: 'Get weather result',
+              title: page_title,
               previous_searches: docs
             }); //will fetch the index file aaccording app.set('views') config
         });
