@@ -182,7 +182,7 @@ class Geo {
                                           min_temp_hourly = celcius_temp_hourly;
                                           max_temp_hourly = celcius_temp_hourly;
                                       } else {
-                                          if(celcius_temp_hourly < celcius_temp_hourly) {
+                                          if(celcius_temp_hourly < min_temp_hourly) {
                                               min_temp_hourly = celcius_temp_hourly;
                                           }
 
