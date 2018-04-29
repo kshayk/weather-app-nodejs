@@ -38,8 +38,6 @@ class Geo {
     }
 
     getWeatherReport(req, res) {
-        var check_query_exists = this.checkQueryExists(req.body);
-
         // console.log(req.body.first_name);
         req.checkBody('address', 'address is reuired').notEmpty(); //express validator for empty value
         req.checkBody('city', 'City is required')
@@ -58,194 +56,14 @@ class Geo {
         };
 
         if(errors) {
-          //re-rendering the form
-          this.renderError(errors, form_parameters, res);
+            //re-rendering the form
+            this.renderError(errors, form_parameters, res);
         } else {
-            // this.getApiResults();
-          request({
-            url: `${google_api_endpoint}${address} ${city} ${country}`,
-            json: true
-          }, (error, response, body) => {
-              if(error || body.error_message) {
-                if(error !== null) {
-                    var request_error_array = [
-                      {
-                        msg: 'Connection with Google APIs has failed. try again later'
-                      }
-                    ];
-
-                    this.renderError(request_error_array, form_parameters, res);
-                } else {
-                  var request_error_array = [
-                    {
-                      msg: body.error_message
-                    }
-                  ];
-
-                  this.renderError(request_error_array, form_parameters, res);
-                }
-              } else {
-                if(body.results.length === 0 || body.status === 'ZERO_RESULTS') {
-                  //zero results - re-rendering the form
-                  var request_error_array = [
-                    {
-                      msg: body.status
-                    }
-                  ];
-
-                  this.renderError(request_error_array, form_parameters, res);
-                } else {
-                  var latitude = body.results[0].geometry.location.lat;
-                  var longtitude = body.results[0].geometry.location.lng;
-
-                  form_parameters.lat = latitude;
-                  form_parameters.lon = longtitude;
-
-                  var weather_url = weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
-
-                  request({
-                    url: weather_url,
-                    json: true
-                  }, (w_error, w_response, w_body) => {
-                      //Now getting the proximate weather report
-                      var proximate_weather_url = proximate_weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
-
-                      request({
-                          url: proximate_weather_url,
-                          json: true
-                      }, (w2_error, w2_response, w2_body) => {
-                          if(w2_error) {
-                              var request_error_array = [
-                                {
-                                  msg: 'Connection with the weather APIs has failed. try again later'
-                                }
-                              ];
-
-                              console.log(w2_error);
-
-                              this.renderError(request_error_array, form_parameters, res);
-                          } else {
-                              var proximate_weather_array = [];
-                              var proximate_weather_hourly_array = [];
-                              gradient_colors = [];
-                              gradient_colors_hourly = [];
-                              min_temp = null;
-                              min_temp_hourly = null;
-                              max_temp = null;
-                              max_temp_hourly = null;
-
-                              var weather_data = w2_body.daily.data;
-                              var weather_data_hourly = w2_body.hourly.data;
-
-                              for(var i = 1; i <= weather_data.length-1; i++) {
-                                  var day_obj = this.createDayObject(weather_data, i);
-
-                                  proximate_weather_array.push(day_obj);
-                              }
-
-                              proximate_weather_array.push({min_temp: min_temp-2, max_temp: max_temp+2});
-                              proximate_weather_array.push(gradient_colors);
-
-                              for(var h = 1; h <= 24; h++) {
-                                  if((h % 3) === 0 ) {
-                                      var hour_obj = this.createHourObject(weather_data_hourly, h);
-
-                                      proximate_weather_hourly_array.push(hour_obj);
-                                  }
-                              }
-
-                              proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
-                              proximate_weather_hourly_array.push(gradient_colors_hourly);
-
-                              if(w_error !== null) {
-                                var request_error_array = [
-                                  {
-                                    msg: w_error
-                                  }
-                                ];
-
-                                this.renderError(request_error_array, form_parameters, res);
-                              } else {
-
-                                var weather_obj = {
-                                  temperature: w_body.main.temp - 273.15, //kelvin to celsius
-                                  humidity_percent: w_body.main.humidity,
-                                  clouds: w_body.weather[0].description,
-                                  wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
-                                }
-
-                                var newSearch = {
-                                  address,
-                                  city,
-                                  country,
-                                  ip: user_ip
-                                };
-
-                                if(check_query_exists) {
-                                  //already has the same address and IP in DB
-                                  db.searches.find({ip: user_ip}, (err, docs) => {
-                                    form_parameters.formatted_address = body.results[0].formatted_address;
-
-                                    res.render('index', {
-                                      title: page_title,
-                                      form_parameters,
-                                      previous_searches: docs,
-                                      google_success: true,
-                                      weather_obj,
-                                      proximate_weather_array,
-                                      proximate_weather_hourly_array
-                                    });
-                                  });
-                                } else {
-                                  //doesnt have the same address and IP. insert it.
-                                  db.searches.insert(newSearch, (err, result) => {
-                                    if(err) {
-                                        var request_error_array = [
-                                          {
-                                            msg: 'Failed to save your search. Try again later.'
-                                          }
-                                        ];
-
-                                        this.renderError(request_error_array, form_parameters, res);
-                                    }
-
-                                    db.searches.find({ip: user_ip}, (err, docs) => {
-                                        if(err) {
-                                            var request_error_array = [
-                                              {
-                                                msg: 'Failed to get your previous searches. Try again later.'
-                                              }
-                                            ];
-
-                                            this.renderError(request_error_array, form_parameters, res);
-                                        }
-
-                                        form_parameters.formatted_address = body.results[0].formatted_address;
-
-                                        res.render('index', {
-                                          title: page_title,
-                                          form_parameters,
-                                          previous_searches: docs,
-                                          google_success: true,
-                                          weather_obj,
-                                          proximate_weather_array
-                                        });
-                                    });
-                                  });
-                                }
-                              }
-                          }
-                      });
-                  });
-                }
-              }
-          });
+            this.getApiAddressResults(form_parameters, req, res);
         }
     }
 
     getWeatherReportByCoordinates(req, res) {
-        var check_query_exists = this.checkQueryExists(req.body);
-
         // console.log(req.body.first_name);
         req.checkBody('latitude', 'latitude is reuired').notEmpty(); //express validator for empty value
         req.checkBody('longitude', 'longitude is required').notEmpty();
@@ -266,110 +84,9 @@ class Geo {
 
         if(errors) {
           //re-rendering the form
-          this.renderError(errors, form_parameters, res);
+            this.renderError(errors, form_parameters, res);
         } else {
-          var latitude = lat;
-          var longtitude = lon;
-
-          form_parameters.lat = latitude;
-          form_parameters.lon = longtitude;
-
-          var weather_url = weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
-
-          request({
-            url: weather_url,
-            json: true
-          }, (w_error, w_response, w_body) => {
-              //Now getting the proximate weather report
-              var proximate_weather_url = proximate_weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
-
-              request({
-                  url: proximate_weather_url,
-                  json: true
-              }, (w2_error, w2_response, w2_body) => {
-                  if(w2_error) {
-                      var request_error_array = [
-                        {
-                          msg: 'Connection with the weather APIs has failed. try again later'
-                        }
-                      ];
-
-                      console.log(w2_error);
-
-                      this.renderError(request_error_array, form_parameters, res);
-                  } else {
-                      var proximate_weather_array = [];
-                      var proximate_weather_hourly_array = [];
-                      gradient_colors = [];
-                      gradient_colors_hourly = [];
-                      min_temp = null;
-                      min_temp_hourly = null;
-                      max_temp = null;
-                      max_temp_hourly = null;
-
-                      var weather_data = w2_body.daily.data;
-                      var weather_data_hourly = w2_body.hourly.data;
-
-                      for(var i = 1; i <= weather_data.length-1; i++) {
-                          var day_obj = this.createDayObject(weather_data, i);
-
-                          proximate_weather_array.push(day_obj);
-                      }
-
-                      proximate_weather_array.push({min_temp: min_temp-2, max_temp: max_temp+2});
-                      proximate_weather_array.push(gradient_colors);
-
-                      for(var h = 1; h <= 24; h++) {
-                          if((h % 3) === 0 ) {
-                              var hour_obj = this.createHourObject(weather_data_hourly, h);
-
-                              proximate_weather_hourly_array.push(hour_obj);
-                          }
-                      }
-
-                      proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
-                      proximate_weather_hourly_array.push(gradient_colors_hourly);
-
-                      if(w_error !== null) {
-                        var request_error_array = [
-                          {
-                            msg: w_error
-                          }
-                        ];
-
-                        this.renderError(request_error_array, form_parameters, res);
-                      } else {
-
-                        var weather_obj = {
-                          temperature: w_body.main.temp - 273.15, //kelvin to celsius
-                          humidity_percent: w_body.main.humidity,
-                          clouds: w_body.weather[0].description,
-                          wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
-                        }
-
-                        var newSearch = {
-                          address,
-                          city,
-                          country,
-                          ip: user_ip
-                        };
-
-
-                      db.searches.find({ip: user_ip}, (err, docs) => {
-                        res.render('index', {
-                          title: page_title,
-                          form_parameters,
-                          previous_searches: docs,
-                          google_success: true,
-                          weather_obj,
-                          proximate_weather_array,
-                          proximate_weather_hourly_array
-                        });
-                      });
-                    }
-                  }
-              });
-          });
+            this.getApiCoordinatesResults(form_parameters, req, res);
         }
     }
 
@@ -499,6 +216,279 @@ class Geo {
             hour,
             temperature: celcius_temp_hourly
         };
+    }
+
+    getApiAddressResults(form_parameters, req, res) {
+        var check_query_exists = this.checkQueryExists(req.body);
+
+        request({
+          url: `${google_api_endpoint}${form_parameters.address} ${form_parameters.city} ${form_parameters.country}`,
+          json: true
+        }, (error, response, body) => {
+            if(error || body.error_message) {
+              if(error !== null) {
+                  var request_error_array = [
+                    {
+                      msg: 'Connection with Google APIs has failed. try again later'
+                    }
+                  ];
+
+                  this.renderError(request_error_array, form_parameters, res);
+              } else {
+                var request_error_array = [
+                  {
+                    msg: body.error_message
+                  }
+                ];
+
+                this.renderError(request_error_array, form_parameters, res);
+              }
+            } else {
+              if(body.results.length === 0 || body.status === 'ZERO_RESULTS') {
+                //zero results - re-rendering the form
+                var request_error_array = [
+                  {
+                    msg: body.status
+                  }
+                ];
+
+                this.renderError(request_error_array, form_parameters, res);
+              } else {
+                var latitude = body.results[0].geometry.location.lat;
+                var longtitude = body.results[0].geometry.location.lng;
+
+                form_parameters.lat = latitude;
+                form_parameters.lon = longtitude;
+
+                var weather_url = weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
+
+                request({
+                  url: weather_url,
+                  json: true
+                }, (w_error, w_response, w_body) => {
+                    //Now getting the proximate weather report
+                    var proximate_weather_url = proximate_weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
+
+                    request({
+                        url: proximate_weather_url,
+                        json: true
+                    }, (w2_error, w2_response, w2_body) => {
+                        if(w2_error) {
+                            var request_error_array = [
+                              {
+                                msg: 'Connection with the weather APIs has failed. try again later'
+                              }
+                            ];
+
+                            console.log(w2_error);
+
+                            this.renderError(request_error_array, form_parameters, res);
+                        } else {
+                            var proximate_weather_array = [];
+                            var proximate_weather_hourly_array = [];
+                            gradient_colors = [];
+                            gradient_colors_hourly = [];
+                            min_temp = null;
+                            min_temp_hourly = null;
+                            max_temp = null;
+                            max_temp_hourly = null;
+
+                            var weather_data = w2_body.daily.data;
+                            var weather_data_hourly = w2_body.hourly.data;
+
+                            for(var i = 1; i <= weather_data.length-1; i++) {
+                                var day_obj = this.createDayObject(weather_data, i);
+
+                                proximate_weather_array.push(day_obj);
+                            }
+
+                            proximate_weather_array.push({min_temp: min_temp-2, max_temp: max_temp+2});
+                            proximate_weather_array.push(gradient_colors);
+
+                            for(var h = 1; h <= 24; h++) {
+                                if((h % 3) === 0 ) {
+                                    var hour_obj = this.createHourObject(weather_data_hourly, h);
+
+                                    proximate_weather_hourly_array.push(hour_obj);
+                                }
+                            }
+
+                            proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
+                            proximate_weather_hourly_array.push(gradient_colors_hourly);
+
+                            if(w_error !== null) {
+                              var request_error_array = [
+                                {
+                                  msg: w_error
+                                }
+                              ];
+
+                              this.renderError(request_error_array, form_parameters, res);
+                            } else {
+
+                              var weather_obj = {
+                                temperature: w_body.main.temp - 273.15, //kelvin to celsius
+                                humidity_percent: w_body.main.humidity,
+                                clouds: w_body.weather[0].description,
+                                wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
+                              }
+
+                              var newSearch = {
+                                address: form_parameters.address,
+                                city: form_parameters.city,
+                                country: form_parameters.country,
+                                ip: user_ip
+                              };
+
+                              if(check_query_exists) {
+                                //already has the same address and IP in DB
+                                db.searches.find({ip: user_ip}, (err, docs) => {
+                                  form_parameters.formatted_address = body.results[0].formatted_address;
+
+                                  res.render('index', {
+                                    title: page_title,
+                                    form_parameters,
+                                    previous_searches: docs,
+                                    google_success: true,
+                                    weather_obj,
+                                    proximate_weather_array,
+                                    proximate_weather_hourly_array
+                                  });
+                                });
+                              } else {
+                                //doesnt have the same address and IP. insert it.
+                                db.searches.insert(newSearch, (err, result) => {
+                                  if(err) {
+                                      var request_error_array = [
+                                        {
+                                          msg: 'Failed to save your search. Try again later.'
+                                        }
+                                      ];
+
+                                      this.renderError(request_error_array, form_parameters, res);
+                                  }
+
+                                  db.searches.find({ip: user_ip}, (err, docs) => {
+                                      if(err) {
+                                          var request_error_array = [
+                                            {
+                                              msg: 'Failed to get your previous searches. Try again later.'
+                                            }
+                                          ];
+
+                                          this.renderError(request_error_array, form_parameters, res);
+                                      }
+
+                                      form_parameters.formatted_address = body.results[0].formatted_address;
+
+                                      res.render('index', {
+                                        title: page_title,
+                                        form_parameters,
+                                        previous_searches: docs,
+                                        google_success: true,
+                                        weather_obj,
+                                        proximate_weather_array
+                                      });
+                                  });
+                                });
+                              }
+                            }
+                        }
+                    });
+                });
+              }
+            }
+        });
+    }
+
+    getApiCoordinatesResults(form_parameters, req, res) {
+        var weather_url = weather_api_endpoint.replace('{lat}', form_parameters.lat).replace('{lon}', form_parameters.lon);
+
+        request({
+          url: weather_url,
+          json: true
+        }, (w_error, w_response, w_body) => {
+            //Now getting the proximate weather report
+            var proximate_weather_url = proximate_weather_api_endpoint.replace('{lat}', form_parameters.lat).replace('{lon}', form_parameters.lon);
+
+            request({
+                url: proximate_weather_url,
+                json: true
+            }, (w2_error, w2_response, w2_body) => {
+                if(w2_error) {
+                    var request_error_array = [
+                      {
+                        msg: 'Connection with the weather APIs has failed. try again later'
+                      }
+                    ];
+
+                    console.log(w2_error);
+
+                    this.renderError(request_error_array, form_parameters, res);
+                } else {
+                    var proximate_weather_array = [];
+                    var proximate_weather_hourly_array = [];
+                    gradient_colors = [];
+                    gradient_colors_hourly = [];
+                    min_temp = null;
+                    min_temp_hourly = null;
+                    max_temp = null;
+                    max_temp_hourly = null;
+
+                    var weather_data = w2_body.daily.data;
+                    var weather_data_hourly = w2_body.hourly.data;
+
+                    for(var i = 1; i <= weather_data.length-1; i++) {
+                        var day_obj = this.createDayObject(weather_data, i);
+
+                        proximate_weather_array.push(day_obj);
+                    }
+
+                    proximate_weather_array.push({min_temp: min_temp-2, max_temp: max_temp+2});
+                    proximate_weather_array.push(gradient_colors);
+
+                    for(var h = 1; h <= 24; h++) {
+                        if((h % 3) === 0 ) {
+                            var hour_obj = this.createHourObject(weather_data_hourly, h);
+
+                            proximate_weather_hourly_array.push(hour_obj);
+                        }
+                    }
+
+                    proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
+                    proximate_weather_hourly_array.push(gradient_colors_hourly);
+
+                    if(w_error !== null) {
+                      var request_error_array = [
+                        {
+                          msg: w_error
+                        }
+                      ];
+
+                      this.renderError(request_error_array, form_parameters, res);
+                    } else {
+                        var weather_obj = {
+                            temperature: w_body.main.temp - 273.15, //kelvin to celsius
+                            humidity_percent: w_body.main.humidity,
+                            clouds: w_body.weather[0].description,
+                            wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
+                        }
+
+                        db.searches.find({ip: user_ip}, (err, docs) => {
+                          res.render('index', {
+                            title: page_title,
+                            form_parameters,
+                            previous_searches: docs,
+                            google_success: true,
+                            weather_obj,
+                            proximate_weather_array,
+                            proximate_weather_hourly_array
+                          });
+                        });
+                    }
+                }
+            });
+        });
     }
 }
 
