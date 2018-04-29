@@ -136,7 +136,7 @@ class Geo {
 
                                   if(celcius_temp < 20) {
                                       gradient_colors.push(blue_rgb);
-                                  } else if(celcius_temp > 20 && celcius_temp < 30) {
+                                  } else if(celcius_temp >= 20 && celcius_temp < 30) {
                                       gradient_colors.push(light_red_rgb);
                                   } else {
                                       gradient_colors.push(strong_red_rgb);
@@ -374,7 +374,7 @@ class Geo {
 
                           if(celcius_temp < 20) {
                               gradient_colors.push(blue_rgb);
-                          } else if(celcius_temp > 20 && celcius_temp < 30) {
+                          } else if(celcius_temp >= 20 && celcius_temp < 30) {
                               gradient_colors.push(light_red_rgb);
                           } else {
                               gradient_colors.push(strong_red_rgb);
