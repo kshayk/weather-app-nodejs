@@ -57,14 +57,44 @@
         <canvas id="hourChart" width="400" height="400"></canvas>
     <% } %>
 
-    <% if(google_success) { %>
+    <!-- <% if(google_success) { %>
       <iframe
+        id="google-iframe"
         width="600"
         height="400"
         frameborder="0" style="border:0"
         src="https://www.google.com/maps/embed/v1/search?key=AIzaSyD-02M0GmqwiCh-3_WpjY7ai6St6-P5EM8&q=<%= form_parameters.formatted_address %>" allowfullscreen>
       </iframe>
-    <% } %>
+    <% } %> -->
+
+    <div class="col-md-12" style="height: 400">
+        <div id="map" class="col-md-9"></div>
+        <div class="col-md-3">
+            <br>
+            <h5>Search By Coordinates</h5>
+            <br>
+            <form method="post" action="/address/coordinate-search">
+                <label class="sr-only" for="latitude-input">Latitude: </label>
+                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                    <div class="input-group-addon">Lat</div>
+                    <input class="form-control" type="text" id="latitude-input" name="latitude" required>
+                </div>
+                <br>
+                <label class="sr-only" for="longitude-input">Longitude:</label>
+                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                    <div class="input-group-addon">Lon</div>
+                    <input class="form-control" type="text" id="longitude-input" name="longitude" required>
+                </div>
+                <br>
+                <input type="submit" class="btn btn-success" value="submit">
+            </form>
+
+            <br><br><br><br>
+            <small>*Move the marker inside the map to the desired location to change coordinates and search again</small>
+        </div>
+    </div>
+
+    <br>
 
     <% if (previous_searches.length !== 0) { %>
       <h4>Previous search results</h4>
@@ -291,5 +321,94 @@
         });
       </script>
   <% } %>
+  <script>
+      function initialize() {
+          var latLng = new google.maps.LatLng(<%= form_parameters.lat || 40.6971494 %>, <%= form_parameters.lon || -74.2598655 %>);
+          var map = new google.maps.Map(document.getElementById('map'), {
+            center: latLng,
+            zoom: 8,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            disableDefaultUI: true
+          });
+
+          var marker = new google.maps.Marker({
+            position: latLng,
+            title: 'Point A',
+            map: map,
+            draggable: true
+          });
+
+          // Update current position info.
+          updateMarkerPosition(latLng);
+          geocodePosition(latLng);
+
+          // Add dragging event listeners.
+          google.maps.event.addListener(marker, 'dragstart', function() {
+            updateMarkerAddress('Dragging...');
+          });
+
+          google.maps.event.addListener(marker, 'drag', function() {
+            updateMarkerStatus('Dragging...');
+            updateMarkerPosition(marker.getPosition());
+            getPoint_Lat(marker.getPosition());
+            getPoint_Lng(marker.getPosition());
+          });
+
+          google.maps.event.addListener(marker, 'dragend', function() {
+            updateMarkerStatus('Drag ended');
+            geocodePosition(marker.getPosition());
+          });
+      }
+
+      // Onload handler to fire off the app.
+      google.maps.event.addDomListener(window, 'load', initialize);
+
+      var geocoder = new google.maps.Geocoder();
+
+      function geocodePosition(pos) {
+          geocoder.geocode({
+            latLng: pos
+          }, function(responses) {
+            if (responses && responses.length > 0) {
+              updateMarkerAddress(responses[0].formatted_address);
+            } else {
+              updateMarkerAddress('Cannot determine address at this location.');
+            }
+          });
+      }
+
+    function updateMarkerStatus(str) {
+
+    }
+
+    function updateMarkerPosition(latLng) {
+        $('#latitude-input').val(latLng.lat());
+        $('#longitude-input').val(latLng.lng());
+    }
+
+    //TODO: add it to a form.
+    function getPoint_Lat(latLng) {
+      // document.getElementById('pointLat').innerHTML = [
+      //   latLng.lat()
+      // ];
+      // document.getElementById('latitude').value=[
+      //   latLng.lat()
+      // ];
+    }
+
+    function getPoint_Lng(latLng) {
+      // document.getElementById('pointLng').innerHTML = [
+      //   latLng.lng()
+      // ];
+      // longitude = [latLng.lng()];
+      // document.getElementById('longitude').value=[
+      //   latLng.lng()
+      // ];
+    }
+
+    function updateMarkerAddress(str) {
+
+    }
+  </script>
   <div class="col-md-3"></div>
 </div>

@@ -7,7 +7,6 @@ $(document).ready(function() {
 
   $('#daily-button').on('click', function() {
       if($('#dailyButtonLabel').hasClass('btn-success')) {
-          console.log('clicked1');
           return;
       }
 

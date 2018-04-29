@@ -25,6 +25,10 @@ module.exports = (app, geo, bodyParser, expressValidator) => {
         geo.getWeatherReport(req, res);
     });
 
+    app.post('/address/coordinate-search', (req, res) => {
+        geo.getWeatherReportByCoordinates(req, res);
+    });
+
     app.delete('/search/delete/:id', (req, res) => {
         geo.deletGeoRecord(req, res);
     });

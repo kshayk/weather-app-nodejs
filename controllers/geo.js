@@ -90,6 +90,9 @@ class Geo {
                   var latitude = body.results[0].geometry.location.lat;
                   var longtitude = body.results[0].geometry.location.lng;
 
+                  form_parameters.lat = latitude;
+                  form_parameters.lon = longtitude;
+
                   var weather_url = weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
 
                   request({
@@ -211,8 +214,6 @@ class Geo {
                               proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
                               proximate_weather_hourly_array.push(gradient_colors_hourly);
 
-                              console.log(proximate_weather_array);
-
                               if(w_error !== null) {
                                 var request_error_array = [
                                   {
@@ -295,6 +296,201 @@ class Geo {
                   });
                 }
               }
+          });
+        }
+    }
+
+    getWeatherReportByCoordinates(req, res) {
+        var check_query_exists = this.checkQueryExists(req.body);
+
+        // console.log(req.body.first_name);
+        req.checkBody('latitude', 'latitude is reuired').notEmpty(); //express validator for empty value
+        req.checkBody('longitude', 'longitude is required').notEmpty();
+
+        var errors = req.validationErrors(); //checking for erros based on validator
+
+        var lat = req.body.latitude;
+        var lon = req.body.longitude;
+
+        var address = null;
+        var city = null;
+        var country = null;
+
+        var form_parameters = {
+          lat,
+          lon
+        };
+
+        if(errors) {
+          //re-rendering the form
+          this.renderError(errors, form_parameters, res);
+        } else {
+          var latitude = lat;
+          var longtitude = lon;
+
+          form_parameters.lat = latitude;
+          form_parameters.lon = longtitude;
+
+          var weather_url = weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
+
+          request({
+            url: weather_url,
+            json: true
+          }, (w_error, w_response, w_body) => {
+              //Now getting the proximate weather report
+              var proximate_weather_url = proximate_weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
+
+              request({
+                  url: proximate_weather_url,
+                  json: true
+              }, (w2_error, w2_response, w2_body) => {
+                  if(w2_error) {
+                      var request_error_array = [
+                        {
+                          msg: 'Connection with the weather APIs has failed. try again later'
+                        }
+                      ];
+
+                      console.log(w2_error);
+
+                      this.renderError(request_error_array, form_parameters, res);
+                  } else {
+                      var proximate_weather_array = [];
+                      var proximate_weather_hourly_array = [];
+                      var gradient_colors = [];
+                      var gradient_colors_hourly = [];
+                      var min_temp = null;
+                      var min_temp_hourly = null;
+                      var max_temp = null;
+                      var max_temp_hourly = null;
+
+                      var weather_data = w2_body.daily.data;
+                      var weather_data_hourly = w2_body.hourly.data;
+
+                      for(var i = 1; i <= weather_data.length-1; i++) {
+                          var d = new Date(0);
+                          d.setUTCSeconds(weather_data[i].time);
+                          var celcius_temp = Math.round((weather_data[i].temperatureHigh - 32) * 0.5556);
+
+                          if(celcius_temp < 20) {
+                              gradient_colors.push(blue_rgb);
+                          } else if(celcius_temp > 20 && celcius_temp < 30) {
+                              gradient_colors.push(light_red_rgb);
+                          } else {
+                              gradient_colors.push(strong_red_rgb);
+                          }
+
+                          if(min_temp === null) {
+                              min_temp = celcius_temp;
+                              max_temp = celcius_temp;
+                          } else {
+                              if(celcius_temp < min_temp) {
+                                 min_temp = celcius_temp;
+                              }
+
+                              if(max_temp === null || celcius_temp > max_temp) {
+                                  max_temp = celcius_temp;
+                              }
+                          }
+
+                          var day_obj = {
+                              day: weekdays[d.getDay()],
+                              temperature: celcius_temp,
+                              summary: weather_data[i].summary
+                          };
+
+                          proximate_weather_array.push(day_obj);
+                      }
+
+                      proximate_weather_array.push({min_temp: min_temp-2, max_temp: max_temp+2});
+                      proximate_weather_array.push(gradient_colors);
+
+                      for(var h = 1; h <= 24; h++) {
+                          var d2 = new Date(0);
+                          d2.setUTCSeconds(weather_data_hourly[h].time);
+                          var celcius_temp_hourly = Math.round((weather_data_hourly[h].temperature - 32) * 0.5556);
+
+                          if((h % 3) === 0 ) {
+                              if(celcius_temp_hourly < 20) {
+                                  gradient_colors_hourly.push(blue_rgb);
+                              } else if(celcius_temp_hourly >= 20 && celcius_temp_hourly < 30) {
+                                  gradient_colors_hourly.push(light_red_rgb);
+                              } else {
+                                  gradient_colors_hourly.push(strong_red_rgb);
+                              }
+
+
+                              if(min_temp_hourly === null) {
+                                  min_temp_hourly = celcius_temp_hourly;
+                                  max_temp_hourly = celcius_temp_hourly;
+                              } else {
+                                  if(celcius_temp_hourly < min_temp_hourly) {
+                                      min_temp_hourly = celcius_temp_hourly;
+                                  }
+
+                                  if(max_temp_hourly === null || celcius_temp_hourly > max_temp_hourly) {
+                                      max_temp_hourly = celcius_temp_hourly;
+                                  }
+                              }
+
+                              var original_hour = d2.getHours();
+                              if(original_hour < 10) {
+                                  var hour = `0${original_hour}:00`
+                              } else {
+                                  var hour = `${original_hour}:00`
+                              }
+
+                              var hour_obj = {
+                                  hour,
+                                  temperature: celcius_temp_hourly
+                              };
+
+                              proximate_weather_hourly_array.push(hour_obj);
+                          }
+                      }
+
+                      proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
+                      proximate_weather_hourly_array.push(gradient_colors_hourly);
+
+                      if(w_error !== null) {
+                        var request_error_array = [
+                          {
+                            msg: w_error
+                          }
+                        ];
+
+                        this.renderError(request_error_array, form_parameters, res);
+                      } else {
+
+                        var weather_obj = {
+                          temperature: w_body.main.temp - 273.15, //kelvin to celsius
+                          humidity_percent: w_body.main.humidity,
+                          clouds: w_body.weather[0].description,
+                          wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
+                        }
+
+                        var newSearch = {
+                          address,
+                          city,
+                          country,
+                          ip: user_ip
+                        };
+
+
+                      db.searches.find({ip: user_ip}, (err, docs) => {
+                        res.render('index', {
+                          title: page_title,
+                          form_parameters,
+                          previous_searches: docs,
+                          google_success: true,
+                          weather_obj,
+                          proximate_weather_array,
+                          proximate_weather_hourly_array
+                        });
+                      });
+                    }
+                  }
+              });
           });
         }
     }
