@@ -14,6 +14,13 @@ const light_red_rgb = '255,102,102';
 const strong_red_rgb = '255,26,26';
 const blue_rgb = '153,153,255';
 
+var gradient_colors = [];
+var gradient_colors_hourly = [];
+var min_temp = null;
+var min_temp_hourly = null;
+var max_temp = null;
+var max_temp_hourly = null;
+
 const page_title = 'Real Time Weather Report';
 
 var weekdays = [];
@@ -54,6 +61,7 @@ class Geo {
           //re-rendering the form
           this.renderError(errors, form_parameters, res);
         } else {
+            // this.getApiResults();
           request({
             url: `${google_api_endpoint}${address} ${city} ${country}`,
             json: true
@@ -119,47 +127,18 @@ class Geo {
                           } else {
                               var proximate_weather_array = [];
                               var proximate_weather_hourly_array = [];
-                              var gradient_colors = [];
-                              var gradient_colors_hourly = [];
-                              var min_temp = null;
-                              var min_temp_hourly = null;
-                              var max_temp = null;
-                              var max_temp_hourly = null;
+                              gradient_colors = [];
+                              gradient_colors_hourly = [];
+                              min_temp = null;
+                              min_temp_hourly = null;
+                              max_temp = null;
+                              max_temp_hourly = null;
 
                               var weather_data = w2_body.daily.data;
                               var weather_data_hourly = w2_body.hourly.data;
 
                               for(var i = 1; i <= weather_data.length-1; i++) {
-                                  var d = new Date(0);
-                                  d.setUTCSeconds(weather_data[i].time);
-                                  var celcius_temp = Math.round((weather_data[i].temperatureHigh - 32) * 0.5556);
-
-                                  if(celcius_temp < 20) {
-                                      gradient_colors.push(blue_rgb);
-                                  } else if(celcius_temp >= 20 && celcius_temp < 30) {
-                                      gradient_colors.push(light_red_rgb);
-                                  } else {
-                                      gradient_colors.push(strong_red_rgb);
-                                  }
-
-                                  if(min_temp === null) {
-                                      min_temp = celcius_temp;
-                                      max_temp = celcius_temp;
-                                  } else {
-                                      if(celcius_temp < min_temp) {
-                                         min_temp = celcius_temp;
-                                      }
-
-                                      if(max_temp === null || celcius_temp > max_temp) {
-                                          max_temp = celcius_temp;
-                                      }
-                                  }
-
-                                  var day_obj = {
-                                      day: weekdays[d.getDay()],
-                                      temperature: celcius_temp,
-                                      summary: weather_data[i].summary
-                                  };
+                                  var day_obj = this.createDayObject(weather_data, i);
 
                                   proximate_weather_array.push(day_obj);
                               }
@@ -168,44 +147,8 @@ class Geo {
                               proximate_weather_array.push(gradient_colors);
 
                               for(var h = 1; h <= 24; h++) {
-                                  var d2 = new Date(0);
-                                  d2.setUTCSeconds(weather_data_hourly[h].time);
-                                  var celcius_temp_hourly = Math.round((weather_data_hourly[h].temperature - 32) * 0.5556);
-
                                   if((h % 3) === 0 ) {
-                                      if(celcius_temp_hourly < 20) {
-                                          gradient_colors_hourly.push(blue_rgb);
-                                      } else if(celcius_temp_hourly >= 20 && celcius_temp_hourly < 30) {
-                                          gradient_colors_hourly.push(light_red_rgb);
-                                      } else {
-                                          gradient_colors_hourly.push(strong_red_rgb);
-                                      }
-
-
-                                      if(min_temp_hourly === null) {
-                                          min_temp_hourly = celcius_temp_hourly;
-                                          max_temp_hourly = celcius_temp_hourly;
-                                      } else {
-                                          if(celcius_temp_hourly < min_temp_hourly) {
-                                              min_temp_hourly = celcius_temp_hourly;
-                                          }
-
-                                          if(max_temp_hourly === null || celcius_temp_hourly > max_temp_hourly) {
-                                              max_temp_hourly = celcius_temp_hourly;
-                                          }
-                                      }
-
-                                      var original_hour = d2.getHours();
-                                      if(original_hour < 10) {
-                                          var hour = `0${original_hour}:00`
-                                      } else {
-                                          var hour = `${original_hour}:00`
-                                      }
-
-                                      var hour_obj = {
-                                          hour,
-                                          temperature: celcius_temp_hourly
-                                      };
+                                      var hour_obj = this.createHourObject(weather_data_hourly, h);
 
                                       proximate_weather_hourly_array.push(hour_obj);
                                   }
@@ -357,47 +300,18 @@ class Geo {
                   } else {
                       var proximate_weather_array = [];
                       var proximate_weather_hourly_array = [];
-                      var gradient_colors = [];
-                      var gradient_colors_hourly = [];
-                      var min_temp = null;
-                      var min_temp_hourly = null;
-                      var max_temp = null;
-                      var max_temp_hourly = null;
+                      gradient_colors = [];
+                      gradient_colors_hourly = [];
+                      min_temp = null;
+                      min_temp_hourly = null;
+                      max_temp = null;
+                      max_temp_hourly = null;
 
                       var weather_data = w2_body.daily.data;
                       var weather_data_hourly = w2_body.hourly.data;
 
                       for(var i = 1; i <= weather_data.length-1; i++) {
-                          var d = new Date(0);
-                          d.setUTCSeconds(weather_data[i].time);
-                          var celcius_temp = Math.round((weather_data[i].temperatureHigh - 32) * 0.5556);
-
-                          if(celcius_temp < 20) {
-                              gradient_colors.push(blue_rgb);
-                          } else if(celcius_temp >= 20 && celcius_temp < 30) {
-                              gradient_colors.push(light_red_rgb);
-                          } else {
-                              gradient_colors.push(strong_red_rgb);
-                          }
-
-                          if(min_temp === null) {
-                              min_temp = celcius_temp;
-                              max_temp = celcius_temp;
-                          } else {
-                              if(celcius_temp < min_temp) {
-                                 min_temp = celcius_temp;
-                              }
-
-                              if(max_temp === null || celcius_temp > max_temp) {
-                                  max_temp = celcius_temp;
-                              }
-                          }
-
-                          var day_obj = {
-                              day: weekdays[d.getDay()],
-                              temperature: celcius_temp,
-                              summary: weather_data[i].summary
-                          };
+                          var day_obj = this.createDayObject(weather_data, i);
 
                           proximate_weather_array.push(day_obj);
                       }
@@ -406,44 +320,8 @@ class Geo {
                       proximate_weather_array.push(gradient_colors);
 
                       for(var h = 1; h <= 24; h++) {
-                          var d2 = new Date(0);
-                          d2.setUTCSeconds(weather_data_hourly[h].time);
-                          var celcius_temp_hourly = Math.round((weather_data_hourly[h].temperature - 32) * 0.5556);
-
                           if((h % 3) === 0 ) {
-                              if(celcius_temp_hourly < 20) {
-                                  gradient_colors_hourly.push(blue_rgb);
-                              } else if(celcius_temp_hourly >= 20 && celcius_temp_hourly < 30) {
-                                  gradient_colors_hourly.push(light_red_rgb);
-                              } else {
-                                  gradient_colors_hourly.push(strong_red_rgb);
-                              }
-
-
-                              if(min_temp_hourly === null) {
-                                  min_temp_hourly = celcius_temp_hourly;
-                                  max_temp_hourly = celcius_temp_hourly;
-                              } else {
-                                  if(celcius_temp_hourly < min_temp_hourly) {
-                                      min_temp_hourly = celcius_temp_hourly;
-                                  }
-
-                                  if(max_temp_hourly === null || celcius_temp_hourly > max_temp_hourly) {
-                                      max_temp_hourly = celcius_temp_hourly;
-                                  }
-                              }
-
-                              var original_hour = d2.getHours();
-                              if(original_hour < 10) {
-                                  var hour = `0${original_hour}:00`
-                              } else {
-                                  var hour = `${original_hour}:00`
-                              }
-
-                              var hour_obj = {
-                                  hour,
-                                  temperature: celcius_temp_hourly
-                              };
+                              var hour_obj = this.createHourObject(weather_data_hourly, h);
 
                               proximate_weather_hourly_array.push(hour_obj);
                           }
@@ -548,6 +426,79 @@ class Geo {
 
           res.redirect('/');
         });
+    }
+
+    createDayObject(weather_data, index) {
+        var d = new Date(0);
+        d.setUTCSeconds(weather_data[index].time);
+        var celcius_temp = Math.round((weather_data[index].temperatureHigh - 32) * 0.5556);
+
+        if(celcius_temp < 20) {
+            gradient_colors.push(blue_rgb);
+        } else if(celcius_temp >= 20 && celcius_temp < 30) {
+            gradient_colors.push(light_red_rgb);
+        } else {
+            gradient_colors.push(strong_red_rgb);
+        }
+
+        if(min_temp === null) {
+            min_temp = celcius_temp;
+            max_temp = celcius_temp;
+        } else {
+            if(celcius_temp < min_temp) {
+               min_temp = celcius_temp;
+            }
+
+            if(max_temp === null || celcius_temp > max_temp) {
+                max_temp = celcius_temp;
+            }
+        }
+
+        return  {
+            day: weekdays[d.getDay()],
+            temperature: celcius_temp,
+            summary: weather_data[index].summary
+        };
+    }
+
+    createHourObject(weather_data_hourly, index) {
+        var d2 = new Date(0);
+        d2.setUTCSeconds(weather_data_hourly[index].time);
+        var celcius_temp_hourly = Math.round((weather_data_hourly[index].temperature - 32) * 0.5556);
+
+        if(celcius_temp_hourly < 20) {
+            gradient_colors_hourly.push(blue_rgb);
+        } else if(celcius_temp_hourly >= 20 && celcius_temp_hourly < 30) {
+            gradient_colors_hourly.push(light_red_rgb);
+        } else {
+            gradient_colors_hourly.push(strong_red_rgb);
+        }
+
+
+        if(min_temp_hourly === null) {
+            min_temp_hourly = celcius_temp_hourly;
+            max_temp_hourly = celcius_temp_hourly;
+        } else {
+            if(celcius_temp_hourly < min_temp_hourly) {
+                min_temp_hourly = celcius_temp_hourly;
+            }
+
+            if(max_temp_hourly === null || celcius_temp_hourly > max_temp_hourly) {
+                max_temp_hourly = celcius_temp_hourly;
+            }
+        }
+
+        var original_hour = d2.getHours();
+        if(original_hour < 10) {
+            var hour = `0${original_hour}:00`
+        } else {
+            var hour = `${original_hour}:00`
+        }
+
+        return {
+            hour,
+            temperature: celcius_temp_hourly
+        };
     }
 }
 
