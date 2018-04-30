@@ -113,6 +113,12 @@
 
   <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
       <script>
+          if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+              var tooltip_size = 7;
+          } else {
+              var tooltip_size = 2;
+          }
+
         var ctx = document.getElementById("dayChart").getContext('2d');
 
         var gradientStroke = ctx.createLinearGradient(0, 0, 900, 0);
@@ -154,8 +160,8 @@
                     pointHoverBorderColor: gradientStroke,
                     pointBorderWidth: 5,
                     pointHoverRadius: 5,
-                    pointHoverBorderWidth: 2,
-                    pointRadius: 2,
+                    pointHoverBorderWidth: tooltip_size,
+                    pointRadius: tooltip_size,
                     fill: true,
                     backgroundColor: gradientFill,
                     borderWidth: 4,
@@ -181,7 +187,6 @@
                             var summaries = [];
 
                             <% for(var i = 0; i < proximate_weather_array.length; i++) { %>
-                                console.log('sdfsdf');
                                 <% if(typeof proximate_weather_array[i].summary !== 'undefined') { %>
                                     summaries.push("<%= proximate_weather_array[i].summary %>");
                                 <% } %>
@@ -222,6 +227,12 @@
 
   <% if(typeof proximate_weather_hourly_array !== 'undefined' && proximate_weather_hourly_array.length !== 0) { %>
       <script>
+          if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+              var tooltip_size = 7;
+          } else {
+              var tooltip_size = 2;
+          }
+
         var ctx2 = document.getElementById("hourChart").getContext('2d');
 
         var gradientStroke2 = ctx2.createLinearGradient(0, 0, 900, 0);
@@ -266,8 +277,8 @@
                     pointHoverBorderColor: gradientStroke2,
                     pointBorderWidth: 5,
                     pointHoverRadius: 5,
-                    pointHoverBorderWidth: 2,
-                    pointRadius: 2,
+                    pointHoverBorderWidth: tooltip_size,
+                    pointRadius: tooltip_size,
                     fill: true,
                     backgroundColor: gradientFill2,
                     borderWidth: 4,
