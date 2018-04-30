@@ -46,6 +46,6 @@ var middlewareOptions = {
 //use routes outside of app.js
 require('./routes')(app, geo, bodyParser, expressValidator(middlewareOptions));
 
-app.listen(3000, () => {
-  console.log('server started on port 3000');
+app.listen(8080, () => {
+  console.log('server started on port 8080');
 });

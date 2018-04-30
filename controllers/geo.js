@@ -74,10 +74,6 @@ class Geo {
         var lat = req.body.latitude;
         var lon = req.body.longitude;
 
-        var address = null;
-        var city = null;
-        var country = null;
-
         var form_parameters = {
           lat,
           lon
