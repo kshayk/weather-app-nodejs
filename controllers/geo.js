@@ -10,6 +10,7 @@ const google_api_endpoint = `https://maps.googleapis.com/maps/api/geocode/json?k
 const weather_api_endpoint = `http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=${api_keys.weather_api}`;
 const proximate_weather_api_endpoint = `https://api.darksky.net/forecast/${api_keys.darksky_api}/{lat},{lon}`;
 
+const orange_rgb = '255,165,129';
 const light_red_rgb = '255,102,102';
 const strong_red_rgb = '255,26,26';
 const blue_rgb = '153,153,255';
@@ -150,13 +151,7 @@ class Geo {
         d.setUTCSeconds(weather_data[index].time);
         var celcius_temp = Math.round((weather_data[index].temperatureHigh - 32) * 0.5556);
 
-        if(celcius_temp < 20) {
-            gradient_colors.push(blue_rgb);
-        } else if(celcius_temp >= 20 && celcius_temp < 30) {
-            gradient_colors.push(light_red_rgb);
-        } else {
-            gradient_colors.push(strong_red_rgb);
-        }
+        gradient_colors.push(this.chooseTemperatureColor(celcius_temp));
 
         if(min_temp === null) {
             min_temp = celcius_temp;
@@ -183,14 +178,7 @@ class Geo {
         d2.setUTCSeconds(weather_data_hourly[index].time);
         var celcius_temp_hourly = Math.round((weather_data_hourly[index].temperature - 32) * 0.5556);
 
-        if(celcius_temp_hourly < 20) {
-            gradient_colors_hourly.push(blue_rgb);
-        } else if(celcius_temp_hourly >= 20 && celcius_temp_hourly < 30) {
-            gradient_colors_hourly.push(light_red_rgb);
-        } else {
-            gradient_colors_hourly.push(strong_red_rgb);
-        }
-
+        gradient_colors_hourly.push(this.chooseTemperatureColor(celcius_temp_hourly));
 
         if(min_temp_hourly === null) {
             min_temp_hourly = celcius_temp_hourly;
@@ -489,6 +477,18 @@ class Geo {
                 }
             });
         });
+    }
+
+    chooseTemperatureColor(temperature) {
+        if(temperature < 15) {
+            return blue_rgb;
+        } else if(temperature >= 15 && temperature < 25) {
+            return orange_rgb;
+        } else if(temperature >=25 && temperature < 35) {
+            return light_red_rgb;
+        } else {
+            return strong_red_rgb;
+        }
     }
 }
 
