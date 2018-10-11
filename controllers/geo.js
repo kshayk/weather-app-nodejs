@@ -1,9 +1,6 @@
 const request = require('request');
 const ip = require('ip');
-const mongojs = require('mongojs');
-const db = mongojs('address_searches', ['searches']); //specifiyng the database and table(s)
 const api_keys = require('../api_keys');
-const ObjectId = mongojs.ObjectId;
 const user_ip = ip.address();
 
 const google_api_endpoint = `https://maps.googleapis.com/maps/api/geocode/json?key=${api_keys.google_maps_api}&address=`;
@@ -39,9 +36,8 @@ class Geo {
     }
 
     getWeatherReport(req, res) {
-        // console.log(req.body.first_name);
         req.checkBody('address', 'address is reuired').notEmpty(); //express validator for empty value
-        req.checkBody('city', 'City is required')
+        req.checkBody('city', 'City is required');
         req.checkBody('country', 'country is reuired').notEmpty();
 
         var errors = req.validationErrors(); //checking for erros based on validator
@@ -65,7 +61,6 @@ class Geo {
     }
 
     getWeatherReportByCoordinates(req, res) {
-        // console.log(req.body.first_name);
         req.checkBody('latitude', 'latitude is reuired').notEmpty(); //express validator for empty value
         req.checkBody('longitude', 'longitude is required').notEmpty();
 
@@ -111,35 +106,19 @@ class Geo {
     }
 
     renderError(errors, form_parameters, res, proximate_weather_array) {
-        db.searches.find({ip: user_ip}, (err, docs) => {
-          res.render('index', {
-            title: page_title,
-            errors,
-            form_parameters,
-            previous_searches: docs,
-            proximate_weather_array
-          });
-        });
+      res.render('index', {
+        title: page_title,
+        errors,
+        form_parameters,
+        proximate_weather_array
+      });
     }
 
     getPreviousSearches(res, callback) {
         //fetching users from users table
-        db.searches.find({ip: user_ip}, (err, docs) =>{
-            res.render('index', {
-              title: page_title,
-              previous_searches: docs
-            }); //will fetch the index file aaccording app.set('views') config
-        });
-    }
-
-    deletGeoRecord(req, res) {
-        db.searches.remove({_id: ObjectId(req.params.id)}, (err) => {
-          if(err) {
-            console.log(err);
-          }
-
-          res.redirect('/');
-        });
+        res.render('index', {
+          title: page_title,
+        }); //will fetch the index file aaccording app.set('views') config
     }
 
     createDayObject(weather_data, index) {
@@ -264,8 +243,6 @@ class Geo {
                               }
                             ];
 
-                            console.log(w2_error);
-
                             this.renderError(request_error_array, form_parameters, res);
                         } else {
                             var proximate_weather_array = [];
@@ -325,56 +302,27 @@ class Geo {
                               };
 
                               if(check_query_exists) {
-                                //already has the same address and IP in DB
-                                db.searches.find({ip: user_ip}, (err, docs) => {
                                   form_parameters.formatted_address = body.results[0].formatted_address;
 
                                   res.render('index', {
                                     title: page_title,
                                     form_parameters,
-                                    previous_searches: docs,
                                     google_success: true,
                                     weather_obj,
                                     proximate_weather_array,
                                     proximate_weather_hourly_array
                                   });
-                                });
+
                               } else {
-                                //doesnt have the same address and IP. insert it.
-                                db.searches.insert(newSearch, (err, result) => {
-                                  if(err) {
-                                      var request_error_array = [
-                                        {
-                                          msg: 'Failed to save your search. Try again later.'
-                                        }
-                                      ];
+                                  form_parameters.formatted_address = body.results[0].formatted_address;
 
-                                      this.renderError(request_error_array, form_parameters, res);
-                                  }
-
-                                  db.searches.find({ip: user_ip}, (err, docs) => {
-                                      if(err) {
-                                          var request_error_array = [
-                                            {
-                                              msg: 'Failed to get your previous searches. Try again later.'
-                                            }
-                                          ];
-
-                                          this.renderError(request_error_array, form_parameters, res);
-                                      }
-
-                                      form_parameters.formatted_address = body.results[0].formatted_address;
-
-                                      res.render('index', {
-                                        title: page_title,
-                                        form_parameters,
-                                        previous_searches: docs,
-                                        google_success: true,
-                                        weather_obj,
-                                        proximate_weather_array
-                                      });
+                                  res.render('index', {
+                                    title: page_title,
+                                    form_parameters,
+                                    google_success: true,
+                                    weather_obj,
+                                    proximate_weather_array
                                   });
-                                });
                               }
                             }
                         }
@@ -458,17 +406,14 @@ class Geo {
                             wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
                         }
 
-                        db.searches.find({ip: user_ip}, (err, docs) => {
                           res.render('index', {
                             title: page_title,
                             form_parameters,
-                            previous_searches: docs,
                             google_success: true,
                             weather_obj,
                             proximate_weather_array,
                             proximate_weather_hourly_array
                           });
-                        });
                     }
                 }
             });

@@ -28,9 +28,6 @@
         <div class="input-group-addon"><i class="fa fa-globe"></i></div>
         <input class="form-control" id="countryInput" type="text" name="country" placeholder="Country" value="<%= form_parameters.country %>" required>
       </div>
-      <% if(previous_searches.length !== 0) { %>
-        <input type="hidden" value="<%= JSON.stringify(previous_searches) %>" name="existing_addresses">
-      <% } %>
       <input class="btn btn-success" type="submit" value="Submit">
     </form>
 
@@ -93,22 +90,6 @@
             <small>*Move the marker inside the map to the desired location to change coordinates and search again</small>
         </div>
     </div>
-
-    <% if (previous_searches.length !== 0) { %>
-      <h4>Previous search results</h4>
-      <table class="table table-striped" border="2px solid black">
-      <tr><th>Address</th><th>city</th><th>Country</th><th>Actions</th></tr>
-      <% previous_searches.forEach((previous_search) => { %>
-        <tr>
-          <td><%= previous_search.address %></td>
-          <td><%= previous_search.city %></td>
-          <td><%= previous_search.country %></td>
-          <td><a href="#" class="deleteSearch" data-id="<%= previous_search._id %>">delete</a> | <a href='#' class="UseSearch" data-address="<%= previous_search.address %>" data-city="<%= previous_search.city %>" data-country="<%= previous_search.country %>">Use</a></td>
-        </tr>
-      <% }) %>
-    </table>
-    <% } %>
-    <% include partials/footer %>
   </div>
 
   <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
