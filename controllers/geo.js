@@ -1,34 +1,13 @@
-const request = require('request');
-const ip = require('ip');
 const api_keys = require('../api_keys');
-const user_ip = ip.address();
+// const user_ip = ip.address();
 
-const google_api_endpoint = `https://maps.googleapis.com/maps/api/geocode/json?key=${api_keys.google_maps_api}&address=`;
 const weather_api_endpoint = `http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=${api_keys.weather_api}`;
-const proximate_weather_api_endpoint = `https://api.darksky.net/forecast/${api_keys.darksky_api}/{lat},{lon}`;
 
-const orange_rgb = '255,165,129';
-const light_red_rgb = '255,102,102';
-const strong_red_rgb = '255,26,26';
-const blue_rgb = '153,153,255';
-
-var gradient_colors = [];
-var gradient_colors_hourly = [];
-var min_temp = null;
-var min_temp_hourly = null;
-var max_temp = null;
-var max_temp_hourly = null;
+const googleMaps = require('../lib/googleMaps');
+const openWeather = require('../lib/openWeather');
+const proximateWeather = require('../lib/proximateWeather');
 
 const page_title = 'Real Time Weather Report';
-
-var weekdays = [];
-weekdays[0] = "Sunday";
-weekdays[1] = "Monday";
-weekdays[2] = "Tuesday";
-weekdays[3] = "Wednesday";
-weekdays[4] = "Thursday";
-weekdays[5] = "Friday";
-weekdays[6] = "Saturday";
 
 class Geo {
     constructor() {
@@ -82,29 +61,6 @@ class Geo {
         }
     }
 
-    checkQueryExists(request_body) {
-        if(typeof request_body.existing_addresses === 'undefined') {
-            return false;
-        }
-
-        var existing_addresses = JSON.parse(request_body.existing_addresses);
-        if(existing_addresses.length === 0) {
-            return false;
-        };
-
-        var new_address = {address: request_body.address, city: request_body.city, country: request_body.country};
-
-        for(var i = 0; i <= existing_addresses.length - 1; i++) {
-            if(existing_addresses[i].address === new_address.address
-                && existing_addresses[i].city === new_address.city
-                && existing_addresses[i].country === new_address.country) {
-                  return true;
-            }
-        }
-
-        return false;
-    }
-
     renderError(errors, form_parameters, res, proximate_weather_array) {
       res.render('index', {
         title: page_title,
@@ -121,315 +77,56 @@ class Geo {
         }); //will fetch the index file aaccording app.set('views') config
     }
 
-    createDayObject(weather_data, index) {
-        var d = new Date(0);
-        d.setUTCSeconds(weather_data[index].time);
-        var celcius_temp = Math.round((weather_data[index].temperatureHigh - 32) * 0.5556);
-
-        gradient_colors.push(this.chooseTemperatureColor(celcius_temp));
-
-        if(min_temp === null) {
-            min_temp = celcius_temp;
-            max_temp = celcius_temp;
-        } else {
-            if(celcius_temp < min_temp) {
-               min_temp = celcius_temp;
-            }
-
-            if(max_temp === null || celcius_temp > max_temp) {
-                max_temp = celcius_temp;
-            }
-        }
-
-        return  {
-            day: weekdays[d.getDay()],
-            temperature: celcius_temp,
-            summary: weather_data[index].summary
-        };
-    }
-
-    createHourObject(weather_data_hourly, index) {
-        var d2 = new Date(0);
-        d2.setUTCSeconds(weather_data_hourly[index].time);
-        var celcius_temp_hourly = Math.round((weather_data_hourly[index].temperature - 32) * 0.5556);
-
-        gradient_colors_hourly.push(this.chooseTemperatureColor(celcius_temp_hourly));
-
-        if(min_temp_hourly === null) {
-            min_temp_hourly = celcius_temp_hourly;
-            max_temp_hourly = celcius_temp_hourly;
-        } else {
-            if(celcius_temp_hourly < min_temp_hourly) {
-                min_temp_hourly = celcius_temp_hourly;
-            }
-
-            if(max_temp_hourly === null || celcius_temp_hourly > max_temp_hourly) {
-                max_temp_hourly = celcius_temp_hourly;
-            }
-        }
-
-        var original_hour = d2.getHours();
-        if(original_hour < 10) {
-            var hour = `0${original_hour}:00`
-        } else {
-            var hour = `${original_hour}:00`
-        }
-
-        return {
-            hour,
-            temperature: celcius_temp_hourly
-        };
-    }
-
     getApiAddressResults(form_parameters, req, res) {
-        var check_query_exists = this.checkQueryExists(req.body);
+        var lon;
+        var lat;
+        var formatted_address;
 
-        request({
-          url: `${google_api_endpoint}${form_parameters.address} ${form_parameters.city} ${form_parameters.country}`,
-          json: true
-        }, (error, response, body) => {
-            if(error || body.error_message) {
-              if(error !== null) {
-                  var request_error_array = [
-                    {
-                      msg: 'Connection with Google APIs has failed. try again later'
-                    }
-                  ];
+        googleMaps(api_keys, form_parameters)
+            .then((result_obj) => {
+                lon = result_obj.longitude;
+                lat = result_obj.latitude;
+                formatted_address = result_obj.formatted_address;
 
-                  this.renderError(request_error_array, form_parameters, res);
-              } else {
-                var request_error_array = [
-                  {
-                    msg: body.error_message
-                  }
-                ];
+                return openWeather(result_obj.api_url)
+            }).then((open_weather_body) => {
+                return proximateWeather(open_weather_body, api_keys, lon, lat);
+            }).then((proximate_weather_res) => {
+                form_parameters.fomatted_address = formatted_address;
+                form_parameters.lon = lon;
+                form_parameters.lat = lat;
 
-                this.renderError(request_error_array, form_parameters, res);
-              }
-            } else {
-              if(body.results.length === 0 || body.status === 'ZERO_RESULTS') {
-                //zero results - re-rendering the form
-                var request_error_array = [
-                  {
-                    msg: body.status
-                  }
-                ];
-
-                this.renderError(request_error_array, form_parameters, res);
-              } else {
-                var latitude = body.results[0].geometry.location.lat;
-                var longtitude = body.results[0].geometry.location.lng;
-
-                form_parameters.lat = latitude;
-                form_parameters.lon = longtitude;
-
-                var weather_url = weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
-
-                request({
-                  url: weather_url,
-                  json: true
-                }, (w_error, w_response, w_body) => {
-                    //Now getting the proximate weather report
-                    var proximate_weather_url = proximate_weather_api_endpoint.replace('{lat}', latitude).replace('{lon}', longtitude);
-
-                    request({
-                        url: proximate_weather_url,
-                        json: true
-                    }, (w2_error, w2_response, w2_body) => {
-                        if(w2_error) {
-                            var request_error_array = [
-                              {
-                                msg: 'Connection with the weather APIs has failed. try again later'
-                              }
-                            ];
-
-                            this.renderError(request_error_array, form_parameters, res);
-                        } else {
-                            var proximate_weather_array = [];
-                            var proximate_weather_hourly_array = [];
-                            gradient_colors = [];
-                            gradient_colors_hourly = [];
-                            min_temp = null;
-                            min_temp_hourly = null;
-                            max_temp = null;
-                            max_temp_hourly = null;
-
-                            var weather_data = w2_body.daily.data;
-                            var weather_data_hourly = w2_body.hourly.data;
-
-                            for(var i = 1; i <= weather_data.length-1; i++) {
-                                var day_obj = this.createDayObject(weather_data, i);
-
-                                proximate_weather_array.push(day_obj);
-                            }
-
-                            proximate_weather_array.push({min_temp: min_temp-2, max_temp: max_temp+2});
-                            proximate_weather_array.push(gradient_colors);
-
-                            for(var h = 1; h <= 24; h++) {
-                                if((h % 3) === 0 ) {
-                                    var hour_obj = this.createHourObject(weather_data_hourly, h);
-
-                                    proximate_weather_hourly_array.push(hour_obj);
-                                }
-                            }
-
-                            proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
-                            proximate_weather_hourly_array.push(gradient_colors_hourly);
-
-                            if(w_error !== null) {
-                              var request_error_array = [
-                                {
-                                  msg: w_error
-                                }
-                              ];
-
-                              this.renderError(request_error_array, form_parameters, res);
-                            } else {
-
-                              var weather_obj = {
-                                temperature: w_body.main.temp - 273.15, //kelvin to celsius
-                                humidity_percent: w_body.main.humidity,
-                                clouds: w_body.weather[0].description,
-                                wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
-                              }
-
-                              var newSearch = {
-                                address: form_parameters.address,
-                                city: form_parameters.city,
-                                country: form_parameters.country,
-                                ip: user_ip
-                              };
-
-                              if(check_query_exists) {
-                                  form_parameters.formatted_address = body.results[0].formatted_address;
-
-                                  res.render('index', {
-                                    title: page_title,
-                                    form_parameters,
-                                    google_success: true,
-                                    weather_obj,
-                                    proximate_weather_array,
-                                    proximate_weather_hourly_array
-                                  });
-
-                              } else {
-                                  form_parameters.formatted_address = body.results[0].formatted_address;
-
-                                  res.render('index', {
-                                    title: page_title,
-                                    form_parameters,
-                                    google_success: true,
-                                    weather_obj,
-                                    proximate_weather_array
-                                  });
-                              }
-                            }
-                        }
-                    });
+                res.render('index', {
+                    title: page_title,
+                    form_parameters,
+                    google_success: proximate_weather_res.google_success,
+                    weather_obj: proximate_weather_res.weather_obj,
+                    proximate_weather_array: proximate_weather_res.proximate_weather_array,
+                    proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array
                 });
-              }
-            }
-        });
+            }).catch((error) => {
+                this.renderError(error, form_parameters, res);
+            });
     }
 
     getApiCoordinatesResults(form_parameters, req, res) {
-        var weather_url = weather_api_endpoint.replace('{lat}', form_parameters.lat).replace('{lon}', form_parameters.lon);
+        openWeather(weather_api_endpoint.replace('{lat}', form_parameters.lat).replace('{lon}', form_parameters.lon))
+            .then((open_weather_body) => {
+                return proximateWeather(open_weather_body, api_keys, form_parameters.lon, form_parameters.lat);
+            }).then((proximate_weather_res) => {
+                console.log(form_parameters);
 
-        request({
-          url: weather_url,
-          json: true
-        }, (w_error, w_response, w_body) => {
-            //Now getting the proximate weather report
-            var proximate_weather_url = proximate_weather_api_endpoint.replace('{lat}', form_parameters.lat).replace('{lon}', form_parameters.lon);
-
-            request({
-                url: proximate_weather_url,
-                json: true
-            }, (w2_error, w2_response, w2_body) => {
-                if(w2_error) {
-                    var request_error_array = [
-                      {
-                        msg: 'Connection with the weather APIs has failed. try again later'
-                      }
-                    ];
-
-                    console.log(w2_error);
-
-                    this.renderError(request_error_array, form_parameters, res);
-                } else {
-                    var proximate_weather_array = [];
-                    var proximate_weather_hourly_array = [];
-                    gradient_colors = [];
-                    gradient_colors_hourly = [];
-                    min_temp = null;
-                    min_temp_hourly = null;
-                    max_temp = null;
-                    max_temp_hourly = null;
-
-                    var weather_data = w2_body.daily.data;
-                    var weather_data_hourly = w2_body.hourly.data;
-
-                    for(var i = 1; i <= weather_data.length-1; i++) {
-                        var day_obj = this.createDayObject(weather_data, i);
-
-                        proximate_weather_array.push(day_obj);
-                    }
-
-                    proximate_weather_array.push({min_temp: min_temp-2, max_temp: max_temp+2});
-                    proximate_weather_array.push(gradient_colors);
-
-                    for(var h = 1; h <= 24; h++) {
-                        if((h % 3) === 0 ) {
-                            var hour_obj = this.createHourObject(weather_data_hourly, h);
-
-                            proximate_weather_hourly_array.push(hour_obj);
-                        }
-                    }
-
-                    proximate_weather_hourly_array.push({min_temp: min_temp_hourly-2, max_temp: max_temp_hourly+2});
-                    proximate_weather_hourly_array.push(gradient_colors_hourly);
-
-                    if(w_error !== null) {
-                      var request_error_array = [
-                        {
-                          msg: w_error
-                        }
-                      ];
-
-                      this.renderError(request_error_array, form_parameters, res);
-                    } else {
-                        var weather_obj = {
-                            temperature: w_body.main.temp - 273.15, //kelvin to celsius
-                            humidity_percent: w_body.main.humidity,
-                            clouds: w_body.weather[0].description,
-                            wind: w_body.wind.speed * 3.6//meters per second * 3.6 = km/hour
-                        }
-
-                          res.render('index', {
-                            title: page_title,
-                            form_parameters,
-                            google_success: true,
-                            weather_obj,
-                            proximate_weather_array,
-                            proximate_weather_hourly_array
-                          });
-                    }
-                }
+                res.render('index', {
+                        title: page_title,
+                        form_parameters,
+                        google_success: proximate_weather_res.google_success,
+                        weather_obj: proximate_weather_res.weather_obj,
+                        proximate_weather_array: proximate_weather_res.proximate_weather_array,
+                        proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array
+                });
+            }).catch((error) => {
+                this.renderError(error, form_parameters, res);
             });
-        });
-    }
-
-    chooseTemperatureColor(temperature) {
-        if(temperature < 15) {
-            return blue_rgb;
-        } else if(temperature >= 15 && temperature < 25) {
-            return orange_rgb;
-        } else if(temperature >=25 && temperature < 35) {
-            return light_red_rgb;
-        } else {
-            return strong_red_rgb;
-        }
     }
 }
 
