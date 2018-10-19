@@ -114,8 +114,6 @@ class Geo {
             .then((open_weather_body) => {
                 return proximateWeather(open_weather_body, api_keys, form_parameters.lon, form_parameters.lat);
             }).then((proximate_weather_res) => {
-                console.log(form_parameters);
-
                 res.render('index', {
                         title: page_title,
                         form_parameters,
