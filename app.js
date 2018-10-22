@@ -9,6 +9,8 @@ var expressValidator = require('express-validator');
 
 const app = express();
 
+var port = process.env.PORT || 3000;
+
 var geo = new WeatherController();
 
 var logger = (req, res, next) => {
@@ -46,6 +48,6 @@ var middlewareOptions = {
 //use routes outside of app.js
 require('./routes')(app, geo, bodyParser, expressValidator(middlewareOptions));
 
-app.listen(8080, () => {
-  console.log('server started on port 8080');
+app.listen(port, () => {
+  console.log(`server started on port ${port}`);
 });
