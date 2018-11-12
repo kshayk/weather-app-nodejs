@@ -32,4 +32,4 @@ module.exports = (app, geo, bodyParser, expressValidator) => {
     app.delete('/search/delete/:id', (req, res) => {
         geo.deletGeoRecord(req, res);
     });
-}
+};

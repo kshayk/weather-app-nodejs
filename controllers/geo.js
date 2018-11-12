@@ -15,9 +15,9 @@ class Geo {
     }
 
     getWeatherReport(req, res) {
-        req.checkBody('address', 'address is reuired').notEmpty(); //express validator for empty value
+        req.checkBody('address', 'address is required').notEmpty(); //express validator for empty value
         req.checkBody('city', 'City is required');
-        req.checkBody('country', 'country is reuired').notEmpty();
+        req.checkBody('country', 'country is required').notEmpty();
 
         var errors = req.validationErrors(); //checking for erros based on validator
 
@@ -33,20 +33,20 @@ class Geo {
 
         if(errors) {
             //re-rendering the form
-            this.renderError(errors, form_parameters, res);
+            res.status(400).send({errors});
         } else {
             this.getApiAddressResults(form_parameters, req, res);
         }
     }
 
     getWeatherReportByCoordinates(req, res) {
-        req.checkBody('latitude', 'latitude is reuired').notEmpty(); //express validator for empty value
-        req.checkBody('longitude', 'longitude is required').notEmpty();
+        req.checkBody('lat', 'latitude is required').notEmpty(); //express validator for empty value
+        req.checkBody('lon', 'longitude is required').notEmpty();
 
         var errors = req.validationErrors(); //checking for erros based on validator
 
-        var lat = req.body.latitude;
-        var lon = req.body.longitude;
+        var lat = req.body.lat;
+        var lon = req.body.lon;
 
         var form_parameters = {
           lat,
@@ -55,7 +55,7 @@ class Geo {
 
         if(errors) {
           //re-rendering the form
-            this.renderError(errors, form_parameters, res);
+            res.status(400).send({errors});
         } else {
             this.getApiCoordinatesResults(form_parameters, req, res);
         }
@@ -96,7 +96,7 @@ class Geo {
                 form_parameters.lon = lon;
                 form_parameters.lat = lat;
 
-                res.render('index', {
+                res.send({
                     title: page_title,
                     form_parameters,
                     google_success: proximate_weather_res.google_success,
@@ -105,7 +105,10 @@ class Geo {
                     proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array
                 });
             }).catch((error) => {
-                this.renderError(error, form_parameters, res);
+                console.log(error.message);
+                res.status(400).send({
+                    errors: 'Failed to get the data'
+                })
             });
     }
 
@@ -114,16 +117,18 @@ class Geo {
             .then((open_weather_body) => {
                 return proximateWeather(open_weather_body, api_keys, form_parameters.lon, form_parameters.lat);
             }).then((proximate_weather_res) => {
-                res.render('index', {
-                        title: page_title,
-                        form_parameters,
-                        google_success: proximate_weather_res.google_success,
-                        weather_obj: proximate_weather_res.weather_obj,
-                        proximate_weather_array: proximate_weather_res.proximate_weather_array,
-                        proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array
+                res.send({
+                    title: page_title,
+                    form_parameters,
+                    google_success: proximate_weather_res.google_success,
+                    weather_obj: proximate_weather_res.weather_obj,
+                    proximate_weather_array: proximate_weather_res.proximate_weather_array,
+                    proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array
                 });
             }).catch((error) => {
-                this.renderError(error, form_parameters, res);
+                res.status(400).send({
+                    errors: 'Failed to get the data'
+                })
             });
     }
 }

@@ -1,7 +1,7 @@
 <div style="text-align: center">
   <div class="col-md-3"></div>
   <div class="col-md-6 content-div" style="margin: auto">
-    <% include partials/header %>
+      <% include partials/header %>
       <!--google ads-->
       <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
       <!-- weather app -->
@@ -14,402 +14,72 @@
           (adsbygoogle = window.adsbygoogle || []).push({});
       </script>
       <!--end google ads-->
-    <% if (errors) { %>
-      <div class="alert alert-warning">
-        <ul>
-        <% errors.forEach((error) => { %>
-          <li><%= error.msg %></li>
-        <% }) %>
-        </ul>
+
+      <ul id="addressErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
+      <form method="post" class="form-inline" id="addressForm" action="/address/search">
+          <label class="sr-only" for="addressInput">address: </label>
+          <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+              <div class="input-group-addon"><i class="fa fa-home"></i></div>
+              <input class="form-control" id="addressInput" type="text" name="address" placeholder="Address" required>
+          </div>
+          <label for="cityInput" class="sr-only">city: </label>
+          <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+              <div class="input-group-addon"><img src="/resources/images/10486-200.png" width="15" height="16"></img></div>
+              <input id="cityInput" class="form-control" type="text" name="city" placeholder="City" required>
+          </div>
+          <label for="countryInput" class="sr-only">country:</label>
+          <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+              <div class="input-group-addon"><i class="fa fa-globe"></i></div>
+              <input class="form-control" id="countryInput" type="text" name="country" placeholder="Country" required>
+          </div>
+          <button class="btn btn-success" type="submit">Submit <i id="addressLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
+      </form>
+
+      <div class="well chart-canvas">
+          Temperature (celsius): <span class="temp-well"></span>° | Clouds: <span class="clouds-well"></span> | humidity: <span class="humidity-well"></span>% | Wind speed: <span class="wind-well"></span>km/h
       </div>
-    <% } %>
-    <form method="post" class="form-inline" id="addressForm" action="/address/search">
-      <label class="sr-only" for="addressInput">address: </label>
-      <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-        <div class="input-group-addon"><i class="fa fa-home"></i></div>
-        <input class="form-control" id="addressInput" type="text" name="address" placeholder="Address" value="<%= form_parameters.address %>" required>
+
+      <div class="btn-group chart-canvas" data-toggle="buttons">
+          <label class="btn btn-success" id="dailyButtonLabel">
+              <input type="radio" name="daily-button" id="daily-button"> Daily
+          </label>
+          <label class="btn btn-default" id="hourlyButtonLabel">
+              <input type="radio" name="hourly-button" id="hourly-button"> Hourly
+          </label>
       </div>
-      <label for="cityInput" class="sr-only">city: </label>
-      <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-        <div class="input-group-addon"><img src="/resources/images/10486-200.png" width="15" height="16"></img></div>
-        <input id="cityInput" class="form-control" type="text" name="city" value="<%= form_parameters.city %>" placeholder="City" required>
+
+      <div id="canvasBlock">
+          <canvas id="dayChart" width="400" height="400" class="chart-canvas"></canvas>
+          <canvas id="hourChart" width="400" height="400" style="display: none;"></canvas>
       </div>
-      <label for="countryInput" class="sr-only">country:</label>
-      <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-        <div class="input-group-addon"><i class="fa fa-globe"></i></div>
-        <input class="form-control" id="countryInput" type="text" name="country" placeholder="Country" value="<%= form_parameters.country %>" required>
+
+      <div class="col-md-12 col-sm-12" style="height: 400px">
+          <div id="map" class="col-md-9 col-sm-9"></div>
+          <div class="col-md-3 col-sm-3">
+              <br>
+              <h5>Search By Coordinates</h5>
+              <br>
+              <ul id="coordinateErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
+              <form method="post" action="/address/coordinate-search" id="coordinateForm">
+                  <label class="sr-only" for="latitude-input">Latitude: </label>
+                  <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                      <div class="input-group-addon">Lat</div>
+                      <input class="form-control" type="text" id="latitude-input" name="latitude" required>
+                  </div>
+                  <br>
+                  <label class="sr-only" for="longitude-input">Longitude:</label>
+                  <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                      <div class="input-group-addon">Lng</div>
+                      <input class="form-control" type="text" id="longitude-input" name="longitude" required>
+                  </div>
+                  <br>
+                  <button type="submit" class="btn btn-success">Submit <i id="coordinateLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
+              </form>
+
+              <br><br><br><br>
+              <small>*Move the marker inside the map to the desired location to change coordinates and search again</small>
+          </div>
       </div>
-      <input class="btn btn-success" type="submit" value="Submit">
-    </form>
-
-    <% if(weather_obj !== null) { %>
-        <div class="well">Temperature (celsius): <%= Math.round(weather_obj.temperature) %>° | Clouds: <%= weather_obj.clouds %> | humidity: <%= weather_obj.humidity_percent %>% | Wind speed: <%= Math.round(weather_obj.wind) %>km/h</div>
-    <% } %>
-
-    <% if((typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) && (typeof proximate_weather_hourly_array !== 'undefined' && proximate_weather_hourly_array.length !== 0)) { %>
-        <div class="btn-group" data-toggle="buttons">
-              <label class="btn btn-success" id="dailyButtonLabel">
-                <input type="radio" name="daily-button" id="daily-button"> Daily
-              </label>
-              <label class="btn btn-default" id="hourlyButtonLabel">
-                <input type="radio" name="hourly-button" id="hourly-button"> Hourly
-              </label>
-        </div>
-    <% } %>
-
-    <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
-        <canvas id="dayChart" width="400" height="400"></canvas>
-    <% } %>
-
-    <% if(typeof proximate_weather_hourly_array !== 'undefined' && proximate_weather_hourly_array.length !== 0) { %>
-        <canvas id="hourChart" width="400" height="400"></canvas>
-    <% } %>
-
-    <!-- <% if(google_success) { %>
-      <iframe
-        id="google-iframe"
-        width="600"
-        height="400"
-        frameborder="0" style="border:0"
-        src="https://www.google.com/maps/embed/v1/search?key=AIzaSyD-02M0GmqwiCh-3_WpjY7ai6St6-P5EM8&q=<%= form_parameters.formatted_address %>" allowfullscreen>
-      </iframe>
-    <% } %> -->
-
-    <div class="col-md-12 col-sm-12" style="height: 400">
-        <div id="map" class="col-md-9 col-sm-9"></div>
-        <div class="col-md-3 col-sm-3">
-            <br>
-            <h5>Search By Coordinates</h5>
-            <br>
-            <form method="post" action="/address/coordinate-search">
-                <label class="sr-only" for="latitude-input">Latitude: </label>
-                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                    <div class="input-group-addon">Lat</div>
-                    <input class="form-control" type="text" id="latitude-input" name="latitude" required>
-                </div>
-                <br>
-                <label class="sr-only" for="longitude-input">Longitude:</label>
-                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                    <div class="input-group-addon">Lng</div>
-                    <input class="form-control" type="text" id="longitude-input" name="longitude" required>
-                </div>
-                <br>
-                <input type="submit" class="btn btn-success" value="submit">
-            </form>
-
-            <br><br><br><br>
-            <small>*Move the marker inside the map to the desired location to change coordinates and search again</small>
-        </div>
-    </div>
   </div>
-
-  <% if(typeof proximate_weather_array !== 'undefined' && proximate_weather_array.length !== 0) { %>
-      <script>
-          if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-              var tooltip_size = 7;
-          } else {
-              var tooltip_size = 2;
-          }
-
-        var ctx = document.getElementById("dayChart").getContext('2d');
-
-        var gradientStroke = ctx.createLinearGradient(0, 0, 900, 0);
-        gradientStroke.addColorStop(0.1, 'rgba(<%= proximate_weather_array[8][0] %>)');
-        gradientStroke.addColorStop(0.2, 'rgba(<%= proximate_weather_array[8][1] %>)');
-        gradientStroke.addColorStop(0.35, 'rgba(<%= proximate_weather_array[8][2] %>)');
-        gradientStroke.addColorStop(0.5, 'rgba(<%= proximate_weather_array[8][3] %>)');
-        gradientStroke.addColorStop(0.6, 'rgba(<%= proximate_weather_array[8][4] %>)');
-        gradientStroke.addColorStop(0.8, 'rgba(<%= proximate_weather_array[8][5] %>)');
-        gradientStroke.addColorStop(1, 'rgba(<%= proximate_weather_array[8][6] %>)');
-
-        var gradientFill = ctx.createLinearGradient(0, 0, 900, 0);
-        gradientFill.addColorStop(0.1, 'rgba(<%= proximate_weather_array[8][0] %>,0.6)');
-        gradientFill.addColorStop(0.2, 'rgba(<%= proximate_weather_array[8][1] %>,0.6)');
-        gradientFill.addColorStop(0.35, 'rgba(<%= proximate_weather_array[8][2] %>,0.6)');
-        gradientFill.addColorStop(0.5, 'rgba(<%= proximate_weather_array[8][3] %>,0.6)');
-        gradientFill.addColorStop(0.6, 'rgba(<%= proximate_weather_array[8][4] %>,0.6)');
-        gradientFill.addColorStop(0.8, 'rgba(<%= proximate_weather_array[8][5] %>,0.6)');
-        gradientFill.addColorStop(1, 'rgba(<%= proximate_weather_array[8][6] %>,0.6)');
-
-        document.getElementById("dayChart").height = 100;
-        var dayChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [
-                    "<%= proximate_weather_array[0].day %>",
-                    "<%= proximate_weather_array[1].day %>",
-                    "<%= proximate_weather_array[2].day %>",
-                    "<%= proximate_weather_array[3].day %>",
-                    "<%= proximate_weather_array[4].day %>",
-                    "<%= proximate_weather_array[5].day %>",
-                    "<%= proximate_weather_array[6].day %>"
-                ],
-                datasets: [{
-                    borderColor: gradientStroke,
-                    pointBorderColor: gradientStroke,
-                    pointBackgroundColor: gradientStroke,
-                    pointHoverBackgroundColor: gradientStroke,
-                    pointHoverBorderColor: gradientStroke,
-                    pointBorderWidth: 5,
-                    pointHoverRadius: 5,
-                    pointHoverBorderWidth: tooltip_size,
-                    pointRadius: tooltip_size,
-                    fill: true,
-                    backgroundColor: gradientFill,
-                    borderWidth: 4,
-                    label: `Temperature`,
-                    data: [
-                        "<%= proximate_weather_array[0].temperature %>",
-                        "<%= proximate_weather_array[1].temperature %>",
-                        "<%= proximate_weather_array[2].temperature %>",
-                        "<%= proximate_weather_array[3].temperature %>",
-                        "<%= proximate_weather_array[4].temperature %>",
-                        "<%= proximate_weather_array[5].temperature %>",
-                        "<%= proximate_weather_array[6].temperature %>"
-                    ],
-                    borderWidth: 1,
-                    lineTension: 0
-                }]
-            },
-            options: {
-                tooltips: {
-                    callbacks: {
-                        title: function(tooltipItem, data) {
-                            var tooltip_index = tooltipItem[0]['index'];
-                            var summaries = [];
-
-                            <% for(var i = 0; i < proximate_weather_array.length; i++) { %>
-                                <% if(typeof proximate_weather_array[i].summary !== 'undefined') { %>
-                                    summaries.push("<%= proximate_weather_array[i].summary %>");
-                                <% } %>
-                            <% } %>
-
-                            return data['labels'][tooltipItem[0]['index']] + ": " + summaries[tooltip_index];
-                        },
-                        label: function(tooltipItem, data) {
-                            return "Temperature: " + data['datasets'][0]['data'][tooltipItem['index']] + "°C";
-                        },
-                    }
-                },
-                legend: {
-                    display: false
-                },
-                scales: {
-                    yAxes: [{
-                        gridLines: {
-                            display:false
-                        },
-                        ticks: {
-                            suggestedMin: <%= proximate_weather_array[7].min_temp %>,
-                            suggestedMax: <%= proximate_weather_array[7].max_temp %>
-                        }
-                    }],
-                    xAxes: [
-                        {
-                            gridLines: {
-                                offsetGridLines: true
-                            },
-                        }
-                    ]
-                }
-            }
-        });
-      </script>
-  <% } %>
-
-  <% if(typeof proximate_weather_hourly_array !== 'undefined' && proximate_weather_hourly_array.length !== 0) { %>
-      <script>
-          if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-              var tooltip_size = 7;
-          } else {
-              var tooltip_size = 2;
-          }
-
-        var ctx2 = document.getElementById("hourChart").getContext('2d');
-
-        var gradientStroke2 = ctx2.createLinearGradient(0, 0, 900, 0);
-        gradientStroke2.addColorStop(0.1, 'rgba(<%= proximate_weather_hourly_array[9][0] %>)');
-        gradientStroke2.addColorStop(0.2, 'rgba(<%= proximate_weather_hourly_array[9][1] %>)');
-        gradientStroke2.addColorStop(0.35, 'rgba(<%= proximate_weather_hourly_array[9][2] %>)');
-        gradientStroke2.addColorStop(0.5, 'rgba(<%= proximate_weather_hourly_array[9][3] %>)');
-        gradientStroke2.addColorStop(0.6, 'rgba(<%= proximate_weather_hourly_array[9][4] %>)');
-        gradientStroke2.addColorStop(0.75, 'rgba(<%= proximate_weather_hourly_array[9][5] %>)');
-        gradientStroke2.addColorStop(0.85, 'rgba(<%= proximate_weather_hourly_array[9][6] %>)');
-        gradientStroke2.addColorStop(1, 'rgba(<%= proximate_weather_hourly_array[9][7] %>)');
-
-        var gradientFill2 = ctx2.createLinearGradient(0, 0, 900, 0);
-        gradientFill2.addColorStop(0.1, 'rgba(<%= proximate_weather_hourly_array[9][0] %>,0.6)');
-        gradientFill2.addColorStop(0.2, 'rgba(<%= proximate_weather_hourly_array[9][1] %>,0.6)');
-        gradientFill2.addColorStop(0.35, 'rgba(<%= proximate_weather_hourly_array[9][2] %>,0.6)');
-        gradientFill2.addColorStop(0.5, 'rgba(<%= proximate_weather_hourly_array[9][3] %>,0.6)');
-        gradientFill2.addColorStop(0.6, 'rgba(<%= proximate_weather_hourly_array[9][4] %>,0.6)');
-        gradientFill2.addColorStop(0.75, 'rgba(<%= proximate_weather_hourly_array[9][5] %>,0.6)');
-        gradientFill2.addColorStop(0.85, 'rgba(<%= proximate_weather_hourly_array[9][6] %>,0.6)');
-        gradientFill2.addColorStop(1, 'rgba(<%= proximate_weather_hourly_array[9][7] %>,0.6)');
-
-        document.getElementById("hourChart").height = 100;
-        var hourChart = new Chart(ctx2, {
-            type: 'line',
-            data: {
-                labels: [
-                    "<%= proximate_weather_hourly_array[0].hour %>",
-                    "<%= proximate_weather_hourly_array[1].hour %>",
-                    "<%= proximate_weather_hourly_array[2].hour %>",
-                    "<%= proximate_weather_hourly_array[3].hour %>",
-                    "<%= proximate_weather_hourly_array[4].hour %>",
-                    "<%= proximate_weather_hourly_array[5].hour %>",
-                    "<%= proximate_weather_hourly_array[6].hour %>",
-                    "<%= proximate_weather_hourly_array[7].hour %>",
-                ],
-                datasets: [{
-                    borderColor: gradientStroke2,
-                    pointBorderColor: gradientStroke2,
-                    pointBackgroundColor: gradientStroke2,
-                    pointHoverBackgroundColor: gradientStroke2,
-                    pointHoverBorderColor: gradientStroke2,
-                    pointBorderWidth: 5,
-                    pointHoverRadius: 5,
-                    pointHoverBorderWidth: tooltip_size,
-                    pointRadius: tooltip_size,
-                    fill: true,
-                    backgroundColor: gradientFill2,
-                    borderWidth: 4,
-                    label: `Temperature`,
-                    data: [
-                        "<%= proximate_weather_hourly_array[0].temperature %>",
-                        "<%= proximate_weather_hourly_array[1].temperature %>",
-                        "<%= proximate_weather_hourly_array[2].temperature %>",
-                        "<%= proximate_weather_hourly_array[3].temperature %>",
-                        "<%= proximate_weather_hourly_array[4].temperature %>",
-                        "<%= proximate_weather_hourly_array[5].temperature %>",
-                        "<%= proximate_weather_hourly_array[6].temperature %>",
-                        "<%= proximate_weather_hourly_array[7].temperature %>"
-                    ],
-                    borderWidth: 1,
-                    lineTension: 0
-                }]
-            },
-            options: {
-                tooltips: {
-                    callbacks: {
-                        label: function(tooltipItem, data) {
-                            return "Temperature: " + data['datasets'][0]['data'][tooltipItem['index']] + "°C";
-                        },
-                    }
-                },
-                legend: {
-                    display: false
-                },
-                scales: {
-                    yAxes: [{
-                        gridLines: {
-                            display:false
-                        },
-                        ticks: {
-                            suggestedMin: <%= proximate_weather_hourly_array[8].min_temp %>,
-                            suggestedMax: <%= proximate_weather_hourly_array[8].max_temp %>
-                        }
-                    }],
-                    xAxes: [
-                        {
-                            gridLines: {
-                                offsetGridLines: true
-                            },
-                        }
-                    ]
-                }
-            }
-        });
-      </script>
-  <% } %>
-  <script>
-      function initialize() {
-          var latLng = new google.maps.LatLng(<%= form_parameters.lat || 40.6971494 %>, <%= form_parameters.lon || -74.2598655 %>);
-          var map = new google.maps.Map(document.getElementById('map'), {
-            center: latLng,
-            zoom: 8,
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            disableDefaultUI: true
-          });
-
-          var marker = new google.maps.Marker({
-            position: latLng,
-            title: 'Point A',
-            map: map,
-            draggable: true
-          });
-
-          // Update current position info.
-          updateMarkerPosition(latLng);
-          geocodePosition(latLng);
-
-          // Add dragging event listeners.
-          google.maps.event.addListener(marker, 'dragstart', function() {
-            updateMarkerAddress('Dragging...');
-          });
-
-          google.maps.event.addListener(marker, 'drag', function() {
-            updateMarkerStatus('Dragging...');
-            updateMarkerPosition(marker.getPosition());
-            getPoint_Lat(marker.getPosition());
-            getPoint_Lng(marker.getPosition());
-          });
-
-          google.maps.event.addListener(marker, 'dragend', function() {
-            updateMarkerStatus('Drag ended');
-            geocodePosition(marker.getPosition());
-          });
-      }
-
-      // Onload handler to fire off the app.
-      google.maps.event.addDomListener(window, 'load', initialize);
-
-      var geocoder = new google.maps.Geocoder();
-
-      function geocodePosition(pos) {
-          geocoder.geocode({
-            latLng: pos
-          }, function(responses) {
-            if (responses && responses.length > 0) {
-              updateMarkerAddress(responses[0].formatted_address);
-            } else {
-              updateMarkerAddress('Cannot determine address at this location.');
-            }
-          });
-      }
-
-    function updateMarkerStatus(str) {
-
-    }
-
-    function updateMarkerPosition(latLng) {
-        $('#latitude-input').val(latLng.lat());
-        $('#longitude-input').val(latLng.lng());
-    }
-
-    //TODO: add it to a form.
-    function getPoint_Lat(latLng) {
-      // document.getElementById('pointLat').innerHTML = [
-      //   latLng.lat()
-      // ];
-      // document.getElementById('latitude').value=[
-      //   latLng.lat()
-      // ];
-    }
-
-    function getPoint_Lng(latLng) {
-      // document.getElementById('pointLng').innerHTML = [
-      //   latLng.lng()
-      // ];
-      // longitude = [latLng.lng()];
-      // document.getElementById('longitude').value=[
-      //   latLng.lng()
-      // ];
-    }
-
-    function updateMarkerAddress(str) {
-
-    }
-  </script>
   <div class="col-md-3"></div>
 </div>
