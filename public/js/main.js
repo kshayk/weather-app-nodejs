@@ -279,9 +279,7 @@ $(document).ready(function() {
         if(str !== 'Dragging...') {
             if(lastGoogleMapMarkerStatus === 'Drag ended') {
                 lastGoogleMapMarkerStatus = 'Not Dragging';
-                setTimeout(() => {
-                    handleCoordinateRequest();
-                }, 1000);
+                handleCoordinateRequest();
             }
         }
     }
