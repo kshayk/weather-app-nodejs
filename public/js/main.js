@@ -281,7 +281,7 @@ $(document).ready(function() {
                 lastGoogleMapMarkerStatus = 'Not Dragging';
                 setTimeout(() => {
                     handleCoordinateRequest();
-                }, 2000);
+                }, 1000);
             }
         }
     }
