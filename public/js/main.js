@@ -1,4 +1,6 @@
 $(document).ready(function() {
+    var lastGoogleMapMarkerStatus = '';
+
     $('.chart-canvas').hide();
 
     $('.deleteSearch').on('click', deleteUser);
@@ -30,6 +32,10 @@ $(document).ready(function() {
     $("#addressForm").submit((e) => {
         e.preventDefault();
 
+        handleAddressRequest();
+    });
+
+    var handleAddressRequest = () => {
         //clearing all errors from the screen
         clearErrors();
 
@@ -77,11 +83,15 @@ $(document).ready(function() {
                 $("#addressErrors").append(`<li>${errors}</li>`);
             }
         });
-    });
+    };
 
     $("#coordinateForm").submit((e) => {
         e.preventDefault();
 
+        handleCoordinateRequest();
+    });
+
+    var handleCoordinateRequest = () => {
         //clearing all errors from the screen
         clearErrors();
 
@@ -126,7 +136,7 @@ $(document).ready(function() {
                 $("#coordinateErrors").append(`<li>${errors}</li>`);
             }
         });
-    });
+    };
 
     var restoreValues = () =>{
         $('#hourChart').hide();
@@ -234,15 +244,17 @@ $(document).ready(function() {
     }
 
     function updateMarkerStatus(str) {
-
+        lastGoogleMapMarkerStatus = str;
     }
 
     function updateMarkerPosition(latLng) {
+        // console.log(latLng.lat());
         $('#latitude-input').val(latLng.lat());
         $('#longitude-input').val(latLng.lng());
     }
 
     function getPoint_Lat(latLng) {
+        // console.log(latLng.lat());
         // document.getElementById('pointLat').innerHTML = [
         //   latLng.lat()
         // ];
@@ -262,7 +274,16 @@ $(document).ready(function() {
     }
 
     function updateMarkerAddress(str) {
-
+        //If a marker was dragged, it will send a coordinate API call.
+        //the lastGoogleMapMarkerStatus condition is made because refreshing nad address calling was causing it to call the coordinate API call again.
+        if(str !== 'Dragging...') {
+            if(lastGoogleMapMarkerStatus === 'Drag ended') {
+                lastGoogleMapMarkerStatus = 'Not Dragging';
+                setTimeout(() => {
+                    handleCoordinateRequest();
+                }, 2000);
+            }
+        }
     }
 });
 
