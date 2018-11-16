@@ -6,6 +6,7 @@ $(document).ready(function() {
     $('.deleteSearch').on('click', deleteUser);
 
     $('#hourChart').hide();
+    $('#icons').hide();
 
     $('#daily-button').on('click', function() {
         if($('#dailyButtonLabel').hasClass('btn-success')) {
@@ -16,6 +17,8 @@ $(document).ready(function() {
         $('#hourlyButtonLabel').attr('class', 'btn btn-default');
         $('#dayChart').show();
         $('#hourChart').hide();
+
+        $("#icons").show();
     });
 
     $('#hourly-button').on('click', function() {
@@ -27,6 +30,8 @@ $(document).ready(function() {
         $('#dailyButtonLabel').attr('class', 'btn btn-default');
         $('#hourChart').show();
         $('#dayChart').hide();
+
+        $("#icons").hide();
     });
 
     $("#addressForm").submit((e) => {
@@ -70,6 +75,8 @@ $(document).ready(function() {
 
             //getting the canvas element
             loadChart(data);
+
+            $("#icons").show();
         }).fail((xhr) => {
             //remove all loading animations
             hideLoadings();
@@ -123,6 +130,8 @@ $(document).ready(function() {
 
             //getting the canvas element
             loadChart(data);
+
+            $("#icons").show();
         }).fail((xhr) => {
             //remove all loading animations
             hideLoadings();
@@ -185,6 +194,9 @@ $(document).ready(function() {
 
         updateChart(ctx, data);
         updateChart(ctx2, data);
+
+        //updating the weather icon canvases
+        updateIcons(data);
     };
 
     var geocoder = new google.maps.Geocoder();
@@ -479,4 +491,18 @@ function updateChart(chartElement, data) {
             }
         }
     });
+}
+
+function updateIcons(data) {
+    var skycons = new Skycons({"color": "#7d7c8e"});
+
+    skycons.add("day1", data.proximate_weather_array[0].icon.replace('night', 'day'));
+    skycons.add("day2", data.proximate_weather_array[1].icon.replace('night', 'day'));
+    skycons.add("day3", data.proximate_weather_array[2].icon.replace('night', 'day'));
+    skycons.add("day4", data.proximate_weather_array[3].icon.replace('night', 'day'));
+    skycons.add("day5", data.proximate_weather_array[4].icon.replace('night', 'day'));
+    skycons.add("day6", data.proximate_weather_array[5].icon.replace('night', 'day'));
+    skycons.add("day7", data.proximate_weather_array[6].icon.replace('night', 'day'));
+
+    skycons.play();
 }
