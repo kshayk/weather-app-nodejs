@@ -494,15 +494,38 @@ function updateChart(chartElement, data) {
 }
 
 function updateIcons(data) {
-    var skycons = new Skycons({"color": "#7d7c8e"});
+    var rgbToHexMap = {
+        '255,165,129': '#ffa581',
+        '255,102,102': '#ff6666',
+        '255,26,26': '#ff1a1a',
+        '153,153,255': '#9999ff'
+    };
 
-    skycons.add("day1", data.proximate_weather_array[0].icon.replace('night', 'day'));
-    skycons.add("day2", data.proximate_weather_array[1].icon.replace('night', 'day'));
-    skycons.add("day3", data.proximate_weather_array[2].icon.replace('night', 'day'));
-    skycons.add("day4", data.proximate_weather_array[3].icon.replace('night', 'day'));
-    skycons.add("day5", data.proximate_weather_array[4].icon.replace('night', 'day'));
-    skycons.add("day6", data.proximate_weather_array[5].icon.replace('night', 'day'));
-    skycons.add("day7", data.proximate_weather_array[6].icon.replace('night', 'day'));
+    var skycons1 = new Skycons({"color": rgbToHexMap[data.proximate_weather_array[8][0]]});
+    skycons1.add("day1", data.proximate_weather_array[0].icon.replace('night', 'day'));
+    skycons1.play();
 
-    skycons.play();
+    var skycons2 = new Skycons({"color": rgbToHexMap[data.proximate_weather_array[8][1]]});
+    skycons2.add("day2", data.proximate_weather_array[1].icon.replace('night', 'day'));
+    skycons2.play();
+
+    var skycons3 = new Skycons({"color": rgbToHexMap[data.proximate_weather_array[8][2]]});
+    skycons3.add("day3", data.proximate_weather_array[2].icon.replace('night', 'day'));
+    skycons3.play();
+
+    var skycons4 = new Skycons({"color": rgbToHexMap[data.proximate_weather_array[8][3]]});
+    skycons4.add("day4", data.proximate_weather_array[3].icon.replace('night', 'day'));
+    skycons4.play();
+
+    var skycons5 = new Skycons({"color": rgbToHexMap[data.proximate_weather_array[8][4]]});
+    skycons5.add("day5", data.proximate_weather_array[4].icon.replace('night', 'day'));
+    skycons5.play();
+
+    var skycons6 = new Skycons({"color": rgbToHexMap[data.proximate_weather_array[8][5]]});
+    skycons6.add("day6", data.proximate_weather_array[5].icon.replace('night', 'day'));
+    skycons6.play();
+
+    var skycons7 = new Skycons({"color": rgbToHexMap[data.proximate_weather_array[8][6]]});
+    skycons7.add("day7", data.proximate_weather_array[6].icon.replace('night', 'day'));
+    skycons7.play();
 }

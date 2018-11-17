@@ -621,7 +621,7 @@
 
             return draw;
         },
-        add: function(el, draw, color = this.color) {
+        add: function(el, draw) {
             var obj;
 
             if(typeof el === "string")
@@ -644,7 +644,7 @@
             };
 
             this.list.push(obj);
-            this.draw(obj, KEYFRAME, color);
+            this.draw(obj, KEYFRAME);
         },
         set: function(el, draw) {
             var i;
