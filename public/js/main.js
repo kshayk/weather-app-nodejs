@@ -3,8 +3,6 @@ $(document).ready(function() {
 
     $('.chart-canvas').hide();
 
-    $('.deleteSearch').on('click', deleteUser);
-
     $('#hourChart').hide();
     $('#icons').hide();
 
@@ -241,7 +239,7 @@ $(document).ready(function() {
     }
 
     // Onload handler to fire off the app.
-    google.maps.event.addDomListener(window, 'load', initialize(40.6971494, -74.2598655));
+    google.maps.event.addDomListener(window, 'load', getLocation);
 
     function geocodePosition(pos) {
         geocoder.geocode({
@@ -295,36 +293,19 @@ $(document).ready(function() {
             }
         }
     }
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                return initialize(position.coords.latitude, position.coords.longitude);
+            }, (err) => {
+                return initialize(40.6971494, -74.2598655);
+            });
+        } else {
+            return initialize(40.6971494, -74.2598655);
+        }
+    }
 });
-
-function deleteUser() {
-  var confirmation = confirm('Are you sure?');
-
-  if(confirmation) {
-    $.ajax({
-      type: 'DELETE',
-      url: `/search/delete/${$(this).data('id')}`
-    }).done((response) => {
-      window.location.replace('/');
-    });
-
-    window.location.replace('/');
-  } else {
-    return false;
-  }
-}
-
-function searchAgain() {
-    var address = $(this).data('address');
-    var city = $(this).data('city');
-    var country = $(this).data('country');
-
-    $('#addressInput').val(address);
-    $('#cityInput').val(city);
-    $('#countryInput').val(country);
-
-    $('#addressForm').submit();
-}
 
 function updateChart(chartElement, data) {
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
