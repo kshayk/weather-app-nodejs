@@ -96,15 +96,15 @@ $(document).ready(function() {
         handleCoordinateRequest();
     });
 
-    var handleCoordinateRequest = () => {
+    var handleCoordinateRequest = (lat = false, lon = false) => {
         //clearing all errors from the screen
         clearErrors();
 
         //show loading symbol for a pending request
         showLoading('coordinate');
 
-        var latInput = $("#latitude-input").val();
-        var lonInput = $("#longitude-input").val();
+        var latInput = lat || $("#latitude-input").val();
+        var lonInput = lon || $("#longitude-input").val();
 
         $.post( "/address/coordinate-search", { lat: latInput, lon: lonInput }).done(function( data ) {
             //restore default values of charts and buttons
@@ -297,6 +297,7 @@ $(document).ready(function() {
     function getLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
+                handleCoordinateRequest(position.coords.latitude, position.coords.longitude);
                 return initialize(position.coords.latitude, position.coords.longitude);
             }, (err) => {
                 return initialize(40.6971494, -74.2598655);
