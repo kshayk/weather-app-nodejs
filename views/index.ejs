@@ -2,18 +2,25 @@
   <div class="col-md-3"></div>
   <div class="col-md-6 content-div" style="margin: auto">
       <% include partials/header %>
-      <!--google ads-->
-      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-      <!-- weather app -->
-      <ins class="adsbygoogle"
-           style="display:inline-block;width:468px;height:60px"
-           data-ad-client="ca-pub-0094229824266640"
-           data-ad-slot="2700322051"
-           data-adtest="on"></ins>
-      <script>
-          (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
-      <!--end google ads-->
+      <!--&lt;!&ndash;google ads&ndash;&gt;-->
+      <!--<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
+      <!--&lt;!&ndash; weather app &ndash;&gt;-->
+      <!--<ins class="adsbygoogle"-->
+           <!--style="display:inline-block;width:468px;height:60px"-->
+           <!--data-ad-client="ca-pub-0094229824266640"-->
+           <!--data-ad-slot="2700322051"-->
+           <!--data-adtest="on"></ins>-->
+      <!--<script>-->
+          <!--(adsbygoogle = window.adsbygoogle || []).push({});-->
+      <!--</script>-->
+      <!--&lt;!&ndash;end google ads&ndash;&gt;-->
+      <div>
+          <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3"></div>
+          <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6" style="padding-left: 0; padding-bottom: 5px">
+              <!-- EZmob AD tag --><script data-cfasync=false src="//s.ato.mx/p.js#id=4988589&size=468x60"></script><!-- end AD tag -->
+          </div>
+          <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3"></div>
+      </div>
 
       <ul id="addressErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
       <form method="post" class="form-inline" id="addressForm" action="/address/search">
@@ -39,7 +46,7 @@
           Temperature (celsius): <span class="temp-well"></span>° | Clouds: <span class="clouds-well"></span> | humidity: <span class="humidity-well"></span>% | Wind speed: <span class="wind-well"></span>km/h
       </div>
 
-      <div class="btn-group chart-canvas" data-toggle="buttons">
+      <div class="btn-group chart-canvas" data-toggle="buttons" style="padding-bottom: 10px">
           <label class="btn btn-success" id="dailyButtonLabel">
               <input type="radio" name="daily-button" id="daily-button"> Daily
           </label>
