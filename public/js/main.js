@@ -513,7 +513,7 @@ function updateChart(chartElement, data) {
 function loadNews(news_data) {
     $("#newsDiv").empty();
 
-    if( ! news_data) {
+    if( ! news_data || news_data.length === 0) {
         $("#dataMenu").hide();
         $("#newsDiv").hide();
         $("#weatherDiv").show();

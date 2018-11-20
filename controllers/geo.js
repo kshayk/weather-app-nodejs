@@ -121,13 +121,25 @@ class Geo {
                             if(data.length > 0) {
                                 //add the news data to the res object
                                 res_object.news = data;
-                                res.send(res_object);
+                                return res.send(res_object);
                             } else {
-                                res.send(res_object);
+                                //didnt find news on top trending, searching for every source
+                                newsApi(encoded_country_name, api_keys.news_api, true)
+                                    .then((all_data) => {
+                                        if(all_data.length > 0) {
+                                            res_object.news = all_data;
+                                            return res.send(res_object);
+                                        } else {
+                                            return res.send(res_object)
+                                        }
+                                    }).catch((all_e) => {
+                                        console.log('all news error', all_e);
+                                        return res.send(res_object)
+                                    })
                             }
                         }).catch((e) => {
                             console.log('news error', e);
-                            res.send(res_object);
+                            return res.send(res_object)
                         });
                 } else {
                     res.send(res_object);
@@ -169,7 +181,19 @@ class Geo {
                                 res_object.news = data;
                                 res.send(res_object);
                             } else {
-                                res.send(res_object);
+                                //didnt find news on top trending, searching for every source
+                                newsApi(encoded_country_name, api_keys.news_api, true)
+                                    .then((all_data) => {
+                                        if(all_data.length > 0) {
+                                            res_object.news = all_data;
+                                            return res.send(res_object);
+                                        } else {
+                                            return res.send(res_object);
+                                        }
+                                    }).catch((all_e) => {
+                                    console.log('all news error', all_e);
+                                    return res.send(res_object)
+                                })
                             }
                         }).catch((e) => {
                             console.log('news error', e);
