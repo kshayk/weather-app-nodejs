@@ -1,13 +1,16 @@
 const api_keys = require('../api_keys');
+const {country_index} = require('../lib/country_index');
 // const user_ip = ip.address();
-
 const weather_api_endpoint = `http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=${api_keys.weather_api}`;
 
 const googleMaps = require('../lib/googleMaps');
 const openWeather = require('../lib/openWeather');
 const proximateWeather = require('../lib/proximateWeather');
+const newsApi = require('../lib/newsApi');
 
 const page_title = 'Real Time Weather Report';
+
+var search_country = '';
 
 class Geo {
     constructor() {
@@ -90,20 +93,45 @@ class Geo {
 
                 return openWeather(result_obj.api_url)
             }).then((open_weather_body) => {
+                search_country = open_weather_body.sys.country || '';
+
                 return proximateWeather(open_weather_body, api_keys, lon, lat);
             }).then((proximate_weather_res) => {
                 form_parameters.fomatted_address = formatted_address;
                 form_parameters.lon = lon;
                 form_parameters.lat = lat;
 
-                res.send({
+                var res_object = {
                     title: page_title,
                     form_parameters,
                     google_success: proximate_weather_res.google_success,
                     weather_obj: proximate_weather_res.weather_obj,
                     proximate_weather_array: proximate_weather_res.proximate_weather_array,
                     proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array
-                });
+                };
+
+                //check if desired location is inside a country (not a sea). if so, get the news for that country
+                if(search_country) {
+                    var country_name = country_index[search_country];
+                    var encoded_country_name = encodeURI(country_name);
+
+                    //get news for that country based on country code
+                    newsApi(encoded_country_name, api_keys.news_api)
+                        .then((data) => {
+                            if(data.length > 0) {
+                                //add the news data to the res object
+                                res_object.news = data;
+                                res.send(res_object);
+                            } else {
+                                res.send(res_object);
+                            }
+                        }).catch((e) => {
+                            console.log('news error', e);
+                            res.send(res_object);
+                        });
+                } else {
+                    res.send(res_object);
+                }
             }).catch((error) => {
                 console.log(error.message);
                 res.status(400).send({
@@ -115,16 +143,41 @@ class Geo {
     getApiCoordinatesResults(form_parameters, req, res) {
         openWeather(weather_api_endpoint.replace('{lat}', form_parameters.lat).replace('{lon}', form_parameters.lon))
             .then((open_weather_body) => {
+                search_country = open_weather_body.sys.country || '';
+
                 return proximateWeather(open_weather_body, api_keys, form_parameters.lon, form_parameters.lat);
             }).then((proximate_weather_res) => {
-                res.send({
+                var res_object = {
                     title: page_title,
                     form_parameters,
                     google_success: proximate_weather_res.google_success,
                     weather_obj: proximate_weather_res.weather_obj,
                     proximate_weather_array: proximate_weather_res.proximate_weather_array,
                     proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array
-                });
+                };
+
+                //check if desired location is inside a country (not a sea). if so, get the news for that country
+                if(search_country) {
+                    var country_name = country_index[search_country];
+                    var encoded_country_name = encodeURI(country_name);
+
+                    //get news for that country based on country code
+                    newsApi(encoded_country_name, api_keys.news_api)
+                        .then((data) => {
+                            if(data.length > 0) {
+                                //add the news data to the res object
+                                res_object.news = data;
+                                res.send(res_object);
+                            } else {
+                                res.send(res_object);
+                            }
+                        }).catch((e) => {
+                            console.log('news error', e);
+                            res.send(res_object);
+                        });
+                } else {
+                    res.send(res_object);
+                }
             }).catch((error) => {
                 res.status(400).send({
                     errors: 'Failed to get the data'

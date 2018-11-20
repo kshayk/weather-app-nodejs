@@ -1,5 +1,6 @@
 $(document).ready(function() {
     var lastGoogleMapMarkerStatus = '';
+    var currentCountry = '';
 
     $('.chart-canvas').hide();
 
@@ -30,6 +31,28 @@ $(document).ready(function() {
         $('#dayChart').hide();
 
         $("#icons").hide();
+    });
+
+    $("#weather-button").on('click', () => {
+        if($("#weatherButtonLabel").hasClass('btn-info')) {
+            return;
+        }
+
+        $("#weatherButtonLabel").attr('class', 'btn btn-info');
+        $("#newsButtonLabel").attr('class', 'btn btn-default');
+        $("#newsDiv").hide();
+        $("#weatherDiv").show();
+    });
+
+    $("#news-button").on('click', () => {
+        if($("#newsButtonLabel").hasClass('btn-info')) {
+            return;
+        }
+
+        $("#newsButtonLabel").attr('class', 'btn btn-info');
+        $("#weatherButtonLabel").attr('class', 'btn btn-default');
+        $("#weatherDiv").hide();
+        $("#newsDiv").show();
     });
 
     $("#addressForm").submit((e) => {
@@ -73,6 +96,9 @@ $(document).ready(function() {
 
             //getting the canvas element
             loadChart(data);
+
+            //append the news to the HTML page
+            loadNews(data.news);
 
             $("#icons").show();
         }).fail((xhr) => {
@@ -128,6 +154,9 @@ $(document).ready(function() {
 
             //getting the canvas element
             loadChart(data);
+
+            //append the news to the HTML page
+            loadNews(data.news);
 
             $("#icons").show();
         }).fail((xhr) => {
@@ -206,7 +235,8 @@ $(document).ready(function() {
             center: latLng,
             zoom: 8,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
-            disableDefaultUI: true
+            disableDefaultUI: true,
+            language: 'en'
         });
 
         var marker = new google.maps.Marker({
@@ -246,6 +276,11 @@ $(document).ready(function() {
             latLng: pos
         }, function(responses) {
             if (responses && responses.length > 0) {
+                let addressArray = responses[0].formatted_address.split(",");
+                let country = addressArray[addressArray.length - 1] || "";
+                //saving the current country to send it to the backend for the news api
+                currentCountry = country.trim();
+
                 updateMarkerAddress(responses[0].formatted_address);
             } else {
                 updateMarkerAddress('Cannot determine address at this location.');
@@ -473,6 +508,32 @@ function updateChart(chartElement, data) {
             }
         }
     });
+}
+
+function loadNews(news_data) {
+    $("#newsDiv").empty();
+
+    if( ! news_data) {
+        $("#dataMenu").hide();
+        $("#newsDiv").hide();
+        $("#weatherDiv").show();
+        $("#weatherButtonLabel").attr('class', 'btn btn-info');
+        $("#newsButtonLabel").attr('class', 'btn btn-default');
+    } else {
+        $("#dataMenu").show();
+    }
+
+    for(var i = 0; i < 3; i++) {
+        var news_html = "";
+        var border = "";
+
+        if(news_data[i]) {
+            border = 'style="border: 3px solid grey; padding:0; margin:2px; width:299px; border-style: outset; height: 400px"';
+            news_html = `<a href='${news_data[i].link}' target="_blank"><img width="293" height="200" src='${news_data[i].image}'><br><br>${news_data[i].title}<br><br><br><span style="color: forestgreen">${news_data[i].source}</span><br><span style="color:darkgrey">today</span></a>`
+        }
+
+        $("#newsDiv").append(`<div class='col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4' ${border}>${news_html}</div>`);
+    }
 }
 
 function updateIcons(data) {

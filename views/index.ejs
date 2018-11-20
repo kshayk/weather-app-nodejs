@@ -1,108 +1,124 @@
 <div style="text-align: center">
-  <div class="col-md-3"></div>
-  <div class="col-md-6 content-div" style="margin: auto">
-      <% include partials/header %>
-      <!--&lt;!&ndash;google ads&ndash;&gt;-->
-      <!--<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
-      <!--&lt;!&ndash; weather app &ndash;&gt;-->
-      <!--<ins class="adsbygoogle"-->
-           <!--style="display:inline-block;width:468px;height:60px"-->
-           <!--data-ad-client="ca-pub-0094229824266640"-->
-           <!--data-ad-slot="2700322051"-->
-           <!--data-adtest="on"></ins>-->
-      <!--<script>-->
-          <!--(adsbygoogle = window.adsbygoogle || []).push({});-->
-      <!--</script>-->
-      <!--&lt;!&ndash;end google ads&ndash;&gt;-->
-      <div>
-          <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3"></div>
-          <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6" style="padding-left: 0; padding-bottom: 5px">
-              <!-- EZmob AD tag --><script data-cfasync=false src="//s.ato.mx/p.js#id=4988589&size=468x60"></script><!-- end AD tag -->
-          </div>
-          <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3"></div>
-      </div>
+    <div class="col-md-3"></div>
+    <div class="col-md-6 content-div" style="margin: auto">
+        <% include partials/header %>
+        <!--&lt;!&ndash;google ads&ndash;&gt;-->
+        <!--<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
+        <!--&lt;!&ndash; weather app &ndash;&gt;-->
+        <!--<ins class="adsbygoogle"-->
+        <!--style="display:inline-block;width:468px;height:60px"-->
+        <!--data-ad-client="ca-pub-0094229824266640"-->
+        <!--data-ad-slot="2700322051"-->
+        <!--data-adtest="on"></ins>-->
+        <!--<script>-->
+        <!--(adsbygoogle = window.adsbygoogle || []).push({});-->
+        <!--</script>-->
+        <!--&lt;!&ndash;end google ads&ndash;&gt;-->
+        <div>
+            <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3"></div>
+            <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6" style="padding-left: 0; padding-bottom: 5px">
+                <!-- EZmob AD tag --><script data-cfasync=false src="//s.ato.mx/p.js#id=4988589&size=468x60"></script><!-- end AD tag -->
+            </div>
+            <div class="col-3 col-sm-3 col-md-3 col-lg-3 col-xl-3"></div>
+        </div>
 
-      <ul id="addressErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
-      <form method="post" class="form-inline" id="addressForm" action="/address/search">
-          <label class="sr-only" for="addressInput">address: </label>
-          <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-              <div class="input-group-addon"><i class="fa fa-home"></i></div>
-              <input class="form-control" id="addressInput" type="text" name="address" placeholder="Address" required>
-          </div>
-          <label for="cityInput" class="sr-only">city: </label>
-          <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-              <div class="input-group-addon"><img src="/resources/images/10486-200.png" width="15" height="16"></img></div>
-              <input id="cityInput" class="form-control" type="text" name="city" placeholder="City" required>
-          </div>
-          <label for="countryInput" class="sr-only">country:</label>
-          <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-              <div class="input-group-addon"><i class="fa fa-globe"></i></div>
-              <input class="form-control" id="countryInput" type="text" name="country" placeholder="Country" required>
-          </div>
-          <button class="btn btn-success" type="submit">Submit <i id="addressLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
-      </form>
+        <ul id="addressErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
+        <form method="post" class="form-inline" id="addressForm" action="/address/search">
+            <label class="sr-only" for="addressInput">address: </label>
+            <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                <div class="input-group-addon"><i class="fa fa-home"></i></div>
+                <input class="form-control" id="addressInput" type="text" name="address" placeholder="Address" required>
+            </div>
+            <label for="cityInput" class="sr-only">city: </label>
+            <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                <div class="input-group-addon"><img src="/resources/images/10486-200.png" width="15" height="16"></img></div>
+                <input id="cityInput" class="form-control" type="text" name="city" placeholder="City" required>
+            </div>
+            <label for="countryInput" class="sr-only">country:</label>
+            <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                <div class="input-group-addon"><i class="fa fa-globe"></i></div>
+                <input class="form-control" id="countryInput" type="text" name="country" placeholder="Country" required>
+            </div>
+            <button class="btn btn-success" type="submit">Submit <i id="addressLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
+        </form>
 
-      <div class="well chart-canvas">
-          Temperature (celsius): <span class="temp-well"></span>° | Clouds: <span class="clouds-well"></span> | humidity: <span class="humidity-well"></span>% | Wind speed: <span class="wind-well"></span>km/h
-      </div>
+        <div class="btn-group" id="dataMenu" data-toggle="buttons" style="padding-bottom: 10px; display: none;">
+            <label class="btn btn-info" id="weatherButtonLabel">
+                <input type="radio" name="weather-button" id="weather-button"> Weather
+            </label>
+            <label class="btn btn-default" id="newsButtonLabel">
+                <input type="radio" name="news-button" id="news-button"> News
+            </label>
+        </div>
 
-      <div class="btn-group chart-canvas" data-toggle="buttons" style="padding-bottom: 10px">
-          <label class="btn btn-success" id="dailyButtonLabel">
-              <input type="radio" name="daily-button" id="daily-button"> Daily
-          </label>
-          <label class="btn btn-default" id="hourlyButtonLabel">
-              <input type="radio" name="hourly-button" id="hourly-button"> Hourly
-          </label>
-      </div>
+        <div id="newsDiv" style="display: none; margin-bottom: 5px"></div>
 
-      <div id="icons" class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-          <div class="col-sm-1 col-md-1 col-lg-1 col-xl-1" style="text-align: left; padding-left: 0; padding-right: 15px"><canvas id="day1" width="50" height="50"></canvas></div>
-          <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding-right: 0; padding-left:15px"><canvas id="day2" width="50" height="50"></canvas></div>
-          <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding-right: 0; padding-left:15px"><canvas id="day3" width="50" height="50"></canvas></div>
-          <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding: 0;"><canvas id="day4" width="50" height="50"></canvas></div>
-          <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding: 0">
-              <canvas id="day5" width="50" height="50"></canvas>
-          </div>
-          <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding: 0">
-              <canvas id="day6" width="50" height="50"></canvas>
-          </div>
-          <div class="col-sm-1 col-md-1 col-lg-1 col-xl-1" style="text-align: right; padding: 0">
-              <canvas id="day7" width="50" height="50"></canvas>
-          </div>
-      </div>
+        <div id="weatherDiv" style="margin-bottom: 5px">
+            <div class="well chart-canvas">
+                Temperature (celsius): <span class="temp-well"></span>° | Clouds: <span class="clouds-well"></span> | humidity: <span class="humidity-well"></span>% | Wind speed: <span class="wind-well"></span>km/h
+            </div>
 
-      <div id="canvasBlock">
-          <canvas id="dayChart" width="400" height="400" class="chart-canvas"></canvas>
-          <canvas id="hourChart" width="400" height="400" style="display: none;"></canvas>
-      </div>
+            <div class="btn-group chart-canvas" data-toggle="buttons" style="padding-bottom: 10px">
+                <label class="btn btn-success" id="dailyButtonLabel">
+                    <input type="radio" name="daily-button" id="daily-button"> Daily
+                </label>
+                <label class="btn btn-default" id="hourlyButtonLabel">
+                    <input type="radio" name="hourly-button" id="hourly-button"> Hourly
+                </label>
+            </div>
 
-      <div class="col-md-12 col-sm-12" style="height: 400px">
-          <div id="map" class="col-md-9 col-sm-9"></div>
-          <div class="col-md-3 col-sm-3">
-              <br>
-              <h5>Search By Coordinates</h5>
-              <br>
-              <ul id="coordinateErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
-              <form method="post" action="/address/coordinate-search" id="coordinateForm">
-                  <label class="sr-only" for="latitude-input">Latitude: </label>
-                  <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                      <div class="input-group-addon">Lat</div>
-                      <input class="form-control" type="text" id="latitude-input" name="latitude" required>
-                  </div>
-                  <br>
-                  <label class="sr-only" for="longitude-input">Longitude:</label>
-                  <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                      <div class="input-group-addon">Lng</div>
-                      <input class="form-control" type="text" id="longitude-input" name="longitude" required>
-                  </div>
-                  <br>
-                  <button type="submit" class="btn btn-success">Submit <i id="coordinateLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
-              </form>
+            <div id="icons" class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                <div class="col-sm-1 col-md-1 col-lg-1 col-xl-1" style="text-align: left; padding-left: 0; padding-right: 15px"><canvas id="day1" width="50" height="50"></canvas></div>
+                <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding-right: 0; padding-left:15px"><canvas id="day2" width="50" height="50"></canvas></div>
+                <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding-right: 0; padding-left:15px"><canvas id="day3" width="50" height="50"></canvas></div>
+                <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding: 0;"><canvas id="day4" width="50" height="50"></canvas></div>
+                <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding: 0">
+                    <canvas id="day5" width="50" height="50"></canvas>
+                </div>
+                <div class="col-sm-2 col-md-2 col-lg-2 col-xl-2" style="padding: 0">
+                    <canvas id="day6" width="50" height="50"></canvas>
+                </div>
+                <div class="col-sm-1 col-md-1 col-lg-1 col-xl-1" style="text-align: right; padding: 0">
+                    <canvas id="day7" width="50" height="50"></canvas>
+                </div>
+            </div>
 
-              <br><br><br><br>
-              <small>*Move the marker inside the map to the desired location to change coordinates and search again</small>
-          </div>
-      </div>
-  </div>
-  <div class="col-md-3"></div>
+            <div id="canvasBlock">
+                <canvas id="dayChart" width="400" height="400" class="chart-canvas"></canvas>
+                <canvas id="hourChart" width="400" height="400" style="display: none;"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-12 col-sm-12" style="height: 400px">
+            <div id="map" class="col-md-9 col-sm-9"></div>
+            <div class="col-md-3 col-sm-3">
+                <br>
+                <h5>Search By Coordinates</h5>
+                <br>
+                <ul id="coordinateErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
+                <form method="post" action="/address/coordinate-search" id="coordinateForm">
+                    <label class="sr-only" for="latitude-input">Latitude: </label>
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <div class="input-group-addon">Lat</div>
+                        <input class="form-control" type="text" id="latitude-input" name="latitude" required>
+                    </div>
+                    <br>
+                    <label class="sr-only" for="longitude-input">Longitude:</label>
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <div class="input-group-addon">Lng</div>
+                        <input class="form-control" type="text" id="longitude-input" name="longitude" required>
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-success">Submit <i id="coordinateLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
+                </form>
+
+                <br><br><br><br>
+                <small>*Move the marker inside the map to the desired location to change coordinates and search again</small>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+            <small style="color: darkgrey">Special thanks to darksky.net, openweathermap.org and newsapi.org</small>
+        </div>
+    </div>
+    <div class="col-md-3"></div>
 </div>
