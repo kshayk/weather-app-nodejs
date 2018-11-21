@@ -1,4 +1,10 @@
-module.exports = (app, geo, bodyParser, expressValidator) => {
+const WeatherController = require('../controllers/geo'); //no need for geo.js since this file is with .js extension
+const NewsController = require('../controllers/news');
+
+var geo = new WeatherController();
+var news = new NewsController();
+
+module.exports = (app, bodyParser, expressValidator) => {
 
     //global vars
     app.use((req, res, next) => {
@@ -22,14 +28,40 @@ module.exports = (app, geo, bodyParser, expressValidator) => {
     });
 
     app.post('/address/search', (req, res) => {
-        geo.getWeatherReport(req, res);
+        var payload;
+
+        geo.getApiAddressResults(req)
+            .then((geo_res) => {
+                payload = geo_res;
+                return news.getNews(geo_res.search_country);
+            }).then((news_data) => {
+                if(news_data.length > 0) {
+                    payload.news = news_data;
+                }
+
+                res.send(payload);
+            })
+            .catch((e) => {
+                //e must equal to an object with a key of "errors" which can be a string or array
+               res.status(400).send(e);
+            });
     });
 
     app.post('/address/coordinate-search', (req, res) => {
-        geo.getWeatherReportByCoordinates(req, res);
-    });
+        var payload;
 
-    app.delete('/search/delete/:id', (req, res) => {
-        geo.deletGeoRecord(req, res);
+        geo.getApiCoordinatesResults(req)
+            .then((geo_res) => {
+                payload = geo_res;
+                return news.getNews(geo_res.search_country);
+            }).then((news_data) => {
+                if(news_data.length > 0) {
+                    payload.news = news_data;
+                }
+
+                res.send(payload);
+            }).catch((e) => {
+                res.status(400).send(e);
+            })
     });
 };

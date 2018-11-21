@@ -3,15 +3,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const WeatherController = require('./controllers/geo'); //no need for geo.js since this file is with .js extension
 
 var expressValidator = require('express-validator');
 
 const app = express();
 
 var port = process.env.PORT || 3000;
-
-var geo = new WeatherController();
 
 var logger = (req, res, next) => {
   console.log('logging....');
@@ -46,7 +43,7 @@ var middlewareOptions = {
 };
 
 //use routes outside of app.js
-require('./routes')(app, geo, bodyParser, expressValidator(middlewareOptions));
+require('./routes')(app, bodyParser, expressValidator(middlewareOptions));
 
 app.listen(port, () => {
   console.log(`server started on port ${port}`);
