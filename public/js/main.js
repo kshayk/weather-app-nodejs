@@ -117,6 +117,9 @@ $(document).ready(function() {
     };
 
     $("#coordinateForm").submit((e) => {
+        //initialize google map with new coordinates
+        initialize($("#latitude-input").val(), $("#longitude-input").val());
+
         e.preventDefault();
 
         handleCoordinateRequest();
