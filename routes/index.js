@@ -1,5 +1,6 @@
 const WeatherController = require('../controllers/geo'); //no need for geo.js since this file is with .js extension
 const NewsController = require('../controllers/news');
+const flags = require('../lib/flags');
 
 var geo = new WeatherController();
 var news = new NewsController();
@@ -39,6 +40,13 @@ module.exports = (app, bodyParser, expressValidator) => {
                     payload.news = news_data;
                 }
 
+                return flags(payload.search_country);
+                // res.send(payload);
+            }).then((country_flag) => {
+                if(country_flag) {
+                    payload.flag = country_flag;
+                }
+
                 res.send(payload);
             })
             .catch((e) => {
@@ -57,6 +65,13 @@ module.exports = (app, bodyParser, expressValidator) => {
             }).then((news_data) => {
                 if(news_data.length > 0) {
                     payload.news = news_data;
+                }
+
+                return flags(payload.search_country);
+                //res.send(payload);
+            }).then((country_flag) => {
+                if(country_flag) {
+                    payload.flag = country_flag;
                 }
 
                 res.send(payload);

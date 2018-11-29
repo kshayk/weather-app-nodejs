@@ -19,7 +19,7 @@ class News {
                         resolve(data);
                     }).catch((e) => {
                         console.log('news error', e);
-                        p_error({errors: "Failed to get "});
+                        p_error({errors: "Failed to get the news"});
                     });
             } else {
                 resolve([]);

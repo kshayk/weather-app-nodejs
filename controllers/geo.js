@@ -82,7 +82,8 @@ class Geo {
                         weather_obj: proximate_weather_res.weather_obj,
                         proximate_weather_array: proximate_weather_res.proximate_weather_array,
                         proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array,
-                        search_country
+                        search_country,
+                        now_icon: proximate_weather_res.now_icon
                     });
             }).catch((error) => {
                 console.log("Address request", error.message);
@@ -129,7 +130,8 @@ class Geo {
                         weather_obj: proximate_weather_res.weather_obj,
                         proximate_weather_array: proximate_weather_res.proximate_weather_array,
                         proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array,
-                        search_country
+                        search_country,
+                        now_icon: proximate_weather_res.now_icon
                     };
 
                     resolve(res_object);

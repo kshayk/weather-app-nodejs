@@ -88,7 +88,9 @@ $(document).ready(function() {
                 weatherObject.temperature,
                 weatherObject.clouds,
                 weatherObject.humidity_percent,
-                data.weather_obj.wind
+                data.weather_obj.wind,
+                data.flag,
+                data.now_icon
             );
 
             //removing and re-adding the canvases to avoid styling bugs when re-rendering a new weather report
@@ -149,7 +151,9 @@ $(document).ready(function() {
                 weatherObject.temperature,
                 weatherObject.clouds,
                 weatherObject.humidity_percent,
-                data.weather_obj.wind
+                data.weather_obj.wind,
+                data.flag,
+                data.now_icon
             );
 
             //removing and re-adding the canvases to avoid styling bugs when re-rendering a new weather report
@@ -183,12 +187,24 @@ $(document).ready(function() {
         $('#hourlyButtonLabel').attr('class', 'btn btn-default');
     };
 
-    var updateWellValues = (temp, clouds, humidity, wind) => {
+    var updateWellValues = (temp, clouds, humidity, wind, flag, now_icon) => {
         $('.chart-canvas').show();
+        if(flag) {
+            $('.flag-well').html(`<img src="${flag}" width="30" height="20">`);
+        } else {
+            $('.flag-well').html('');
+        }
+
         $('.temp-well').html(Math.round(temp));
         $('.clouds-well').html(clouds);
         $('.humidity-well').html(humidity);
         $('.wind-well').html(Math.round(wind));
+
+        $(".chart-canvas").removeClass('rain').removeClass('snow');
+
+        if(now_icon === 'rain' || now_icon === 'snow') {
+            $(".chart-canvas").addClass(now_icon);
+        }
     };
 
     var resetCanvas = () => {
