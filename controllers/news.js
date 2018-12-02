@@ -1,4 +1,3 @@
-const api_keys = require('../api_keys');
 const {country_index} = require('../lib/country_index');
 const newsApi = require('../lib/newsApi');
 
@@ -14,7 +13,7 @@ class News {
                 var encoded_country_name = encodeURI(country_name);
 
                 //get news for that country based on country code
-                newsApi(encoded_country_name, api_keys.news_api)
+                newsApi(encoded_country_name)
                     .then((data) => {
                         resolve(data);
                     }).catch((e) => {

@@ -1,12 +1,10 @@
-const api_keys = require('../api_keys');
 const {country_index} = require('../lib/country_index');
 // const user_ip = ip.address();
-const weather_api_endpoint = `http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=${api_keys.weather_api}`;
+const weather_api_endpoint = `http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=${process.env.OPEN_WEATHER_MAP}`;
 
 const googleMaps = require('../lib/googleMaps');
 const openWeather = require('../lib/openWeather');
 const proximateWeather = require('../lib/proximateWeather');
-const newsApi = require('../lib/newsApi');
 
 const page_title = 'Real Time Weather Report';
 
@@ -59,7 +57,7 @@ class Geo {
                 p_error({errors});
             }
 
-            googleMaps(api_keys, form_parameters)
+            googleMaps(form_parameters)
                 .then((result_obj) => {
                     lon = result_obj.longitude;
                     lat = result_obj.latitude;
@@ -69,7 +67,7 @@ class Geo {
                 }).then((open_weather_body) => {
                     search_country = open_weather_body.sys.country || '';
 
-                    return proximateWeather(open_weather_body, api_keys, lon, lat);
+                    return proximateWeather(open_weather_body, lon, lat);
                 }).then((proximate_weather_res) => {
                     form_parameters.fomatted_address = formatted_address;
                     form_parameters.lon = lon;
@@ -121,7 +119,7 @@ class Geo {
                 .then((open_weather_body) => {
                     search_country = open_weather_body.sys.country || '';
 
-                    return proximateWeather(open_weather_body, api_keys, form_parameters.lon, form_parameters.lat);
+                    return proximateWeather(open_weather_body, form_parameters.lon, form_parameters.lat);
                 }).then((proximate_weather_res) => {
                     var res_object = {
                         title: page_title,

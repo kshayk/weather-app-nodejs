@@ -1,4 +1,5 @@
 //getting address from form - showing map and weather - saving searches for later base on IP maybe
+require('./config/config');
 
 const express = require('express');
 const bodyParser = require('body-parser');
