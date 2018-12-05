@@ -25,21 +25,12 @@
         <ul id="addressErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
         <form method="post" class="form-inline" id="addressForm" action="/address/search">
             <label class="sr-only" for="addressInput">address: </label>
-            <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+            <div class="input-group mb-2 mr-sm-2 mb-sm-0" style="width: 500px">
                 <div class="input-group-addon"><i class="fa fa-home"></i></div>
-                <input class="form-control" id="addressInput" type="text" name="address" placeholder="Address" required>
-            </div>
-            <label for="cityInput" class="sr-only">city: </label>
-            <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                <div class="input-group-addon"><img src="/resources/images/10486-200.png" width="15" height="16"></img></div>
-                <input id="cityInput" class="form-control" type="text" name="city" placeholder="City" required>
-            </div>
-            <label for="countryInput" class="sr-only">country:</label>
-            <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                <div class="input-group-addon"><i class="fa fa-globe"></i></div>
-                <input class="form-control" id="countryInput" type="text" name="country" placeholder="Country" required>
+                <input class="form-control" id="addressInput" type="text" name="address" placeholder="Full Address" required>
             </div>
             <button class="btn btn-success" type="submit">Submit <i id="addressLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
+            <button id="getCurrentLocation" type="button" class="btn btn-default" title="Get results for current location" style="height: 35px"><i class="fa fa-map-marker"></i></button>
         </form>
 
         <div class="btn-group" id="dataMenu" data-toggle="buttons" style="padding-bottom: 10px; display: none;">

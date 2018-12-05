@@ -118,6 +118,10 @@ $(document).ready(function() {
         });
     };
 
+    $("#getCurrentLocation").click(() => {
+        getLocation();
+    });
+
     $("#coordinateForm").submit((e) => {
         //initialize google map with new coordinates
         initialize($("#latitude-input").val(), $("#longitude-input").val());

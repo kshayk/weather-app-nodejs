@@ -37,27 +37,19 @@ class Geo {
 
         return new Promise((resolve, p_error) => {
             req.checkBody('address', 'address is required').notEmpty(); //express validator for empty value
-            req.checkBody('city', 'City is required');
-            req.checkBody('country', 'country is required').notEmpty();
 
             var errors = req.validationErrors(); //checking for erros based on validator
 
             var address = req.body.address;
-            var city = req.body.city;
-            var country = req.body.country;
-
-            var form_parameters = {
-                address,
-                city,
-                country
-            };
 
             if(errors) {
                 //re-rendering the form
                 p_error({errors});
             }
 
-            googleMaps(form_parameters)
+            var form_parameters = {};
+
+            googleMaps(address)
                 .then((result_obj) => {
                     lon = result_obj.longitude;
                     lat = result_obj.latitude;
