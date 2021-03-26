@@ -13,15 +13,6 @@ class Geo {
 
     }
 
-    renderError(errors, form_parameters, res, proximate_weather_array) {
-      res.render('index', {
-        title: page_title,
-        errors,
-        form_parameters,
-        proximate_weather_array
-      });
-    }
-
     getPreviousSearches(res, callback) {
         //fetching users from users table
         res.render('index', {
@@ -29,110 +20,79 @@ class Geo {
         }); //will fetch the index file aaccording app.set('views') config
     }
 
-    getApiAddressResults(req) {
-        var lon,
-            lat,
-            formatted_address,
-            search_country;
+    async getApiAddressResults(req) {
+        req.checkBody('address', 'address is required').notEmpty(); //express validator for empty value
 
-        return new Promise((resolve, p_error) => {
-            req.checkBody('address', 'address is required').notEmpty(); //express validator for empty value
+        let errors = req.validationErrors(); //checking for erros based on validator
 
-            var errors = req.validationErrors(); //checking for erros based on validator
+        if(errors) {
+            //re-rendering the form
+            throw new Error('Please use a correct address');
+        }
 
-            var address = req.body.address;
+        var address = req.body.address;
 
-            if(errors) {
-                //re-rendering the form
-                p_error({errors});
-            }
+        try {
+            const googleRes = await googleMaps(address);
+            const openWeatherRes = await openWeather(googleRes.api_url);
+            const proximateWeatherRes = await proximateWeather(openWeatherRes, googleRes.longitude, googleRes.latitude);
 
-            var form_parameters = {};
-
-            googleMaps(address)
-                .then((result_obj) => {
-                    lon = result_obj.longitude;
-                    lat = result_obj.latitude;
-                    formatted_address = result_obj.formatted_address;
-
-                    return openWeather(result_obj.api_url)
-                }).then((open_weather_body) => {
-                    search_country = open_weather_body.sys.country || '';
-
-                    return proximateWeather(open_weather_body, lon, lat);
-                }).then((proximate_weather_res) => {
-                    form_parameters.fomatted_address = formatted_address;
-                    form_parameters.lon = lon;
-                    form_parameters.lat = lat;
-
-                    resolve({
-                        title: page_title,
-                        form_parameters,
-                        google_success: proximate_weather_res.google_success,
-                        weather_obj: proximate_weather_res.weather_obj,
-                        proximate_weather_array: proximate_weather_res.proximate_weather_array,
-                        proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array,
-                        search_country,
-                        now_icon: proximate_weather_res.now_icon
-                    });
-            }).catch((error) => {
-                console.log("Address request", error.message);
-                p_error({
-                    errors: 'Failed to get the data'
-                });
-            });
-        });
-
-    }
-
-    getApiCoordinatesResults(req) {
-        var search_country;
-
-        return new Promise((resolve, p_error) => {
-            req.checkBody('lat', 'latitude is required').notEmpty(); //express validator for empty value
-            req.checkBody('lon', 'longitude is required').notEmpty();
-
-            var errors = req.validationErrors(); //checking for erros based on validator
-
-            var lat = req.body.lat;
-            var lon = req.body.lon;
-
-            var form_parameters = {
-                lat,
-                lon
+            let form_parameters = {
+                formatted_address: googleRes.formatted_address,
+                lon: googleRes.longitude,
+                lat: googleRes.latitude
             };
 
-            if(errors) {
-                //re-rendering the form
-                p_error({errors});
-            }
+            return {
+                title: page_title,
+                form_parameters,
+                google_success: proximateWeatherRes.google_success,
+                weather_obj: proximateWeatherRes.weather_obj,
+                proximate_weather_array: proximateWeatherRes.proximate_weather_array,
+                proximate_weather_hourly_array: proximateWeatherRes.proximate_weather_hourly_array,
+                search_country: openWeatherRes.sys.country || '',
+                now_icon: proximateWeatherRes.now_icon
+            };
+        } catch (e) {
+            console.log('Address form error:', e);
 
-            openWeather(weather_api_endpoint.replace('{lat}', form_parameters.lat).replace('{lon}', form_parameters.lon))
-                .then((open_weather_body) => {
-                    search_country = open_weather_body.sys.country || '';
+            throw new Error("Failed to get weather data")
+        }
+    }
 
-                    return proximateWeather(open_weather_body, form_parameters.lon, form_parameters.lat);
-                }).then((proximate_weather_res) => {
-                    var res_object = {
-                        title: page_title,
-                        form_parameters,
-                        google_success: proximate_weather_res.google_success,
-                        weather_obj: proximate_weather_res.weather_obj,
-                        proximate_weather_array: proximate_weather_res.proximate_weather_array,
-                        proximate_weather_hourly_array: proximate_weather_res.proximate_weather_hourly_array,
-                        search_country,
-                        now_icon: proximate_weather_res.now_icon
-                    };
+    async getApiCoordinatesResults(req) {
+        req.checkBody('lat', 'latitude is required').notEmpty().isNumeric(); //express validator for empty value
+        req.checkBody('lon', 'longitude is required').notEmpty().isNumeric();
 
-                    resolve(res_object);
-                }).catch((error) => {
-                    console.log("Coordinates request", error.message);
-                    p_error({
-                        errors: 'Failed to get the data'
-                    })
-                });
-        });
+        var errors = req.validationErrors(); //checking for erros based on validator
 
+        if(errors) {
+            //re-rendering the form
+            throw new Error("Please provide valid coordinates");
+        }
+
+        var lat = req.body.lat;
+        var lon = req.body.lon;
+
+        try {
+            const openWeatherRes = await openWeather(weather_api_endpoint.replace('{lat}', lat).replace('{lon}', lon));
+            const proximateWeatherRes = await proximateWeather(openWeatherRes, lon, lat);
+
+            return {
+                title: page_title,
+                form_parameters: {lat, lon},
+                google_success: proximateWeatherRes.google_success,
+                weather_obj: proximateWeatherRes.weather_obj,
+                proximate_weather_array: proximateWeatherRes.proximate_weather_array,
+                proximate_weather_hourly_array: proximateWeatherRes.proximate_weather_hourly_array,
+                search_country: openWeatherRes.sys.country || '',
+                now_icon: proximateWeatherRes.now_icon
+            };
+        } catch (e) {
+            console.log('coordinate form error:', e);
+
+            throw new Error("Failed to get the weather data");
+        }
     }
 }
 

@@ -28,55 +28,43 @@ module.exports = (app, bodyParser, expressValidator) => {
         geo.getPreviousSearches(res);
     });
 
-    app.post('/address/search', (req, res) => {
-        var payload;
+    app.post('/address/search', async (req, res) => {
+        try {
+            const weatherRes = await geo.getApiAddressResults(req);
+            const newsRes = await news.getNews(weatherRes.search_country);
+            const flagsRes = await flags(weatherRes.search_country);
 
-        geo.getApiAddressResults(req)
-            .then((geo_res) => {
-                payload = geo_res;
-                return news.getNews(geo_res.search_country);
-            }).then((news_data) => {
-                if(news_data.length > 0) {
-                    payload.news = news_data;
-                }
+            if (newsRes.length > 0) {
+                weatherRes.news = newsRes;
+            }
 
-                return flags(payload.search_country);
-                // res.send(payload);
-            }).then((country_flag) => {
-                if(country_flag) {
-                    payload.flag = country_flag;
-                }
+            if (flagsRes) {
+                weatherRes.flag = flagsRes;
+            }
 
-                res.send(payload);
-            })
-            .catch((e) => {
-                //e must equal to an object with a key of "errors" which can be a string or array
-               res.status(400).send(e);
-            });
+            res.send(weatherRes);
+        } catch (e) {
+            res.status(400).send({errors: e.message});
+        }
     });
 
-    app.post('/address/coordinate-search', (req, res) => {
-        var payload;
+    app.post('/address/coordinate-search', async (req, res) => {
+        try {
+            const weatherRes = await geo.getApiCoordinatesResults(req);
+            const newsRes = await news.getNews(weatherRes.search_country);
+            const flagsRes = await flags(weatherRes.search_country);
 
-        geo.getApiCoordinatesResults(req)
-            .then((geo_res) => {
-                payload = geo_res;
-                return news.getNews(geo_res.search_country);
-            }).then((news_data) => {
-                if(news_data.length > 0) {
-                    payload.news = news_data;
-                }
+            if (newsRes.length > 0) {
+                weatherRes.news = newsRes;
+            }
 
-                return flags(payload.search_country);
-                //res.send(payload);
-            }).then((country_flag) => {
-                if(country_flag) {
-                    payload.flag = country_flag;
-                }
+            if (flagsRes) {
+                weatherRes.flag = flagsRes;
+            }
 
-                res.send(payload);
-            }).catch((e) => {
-                res.status(400).send(e);
-            })
+            res.send(weatherRes);
+        } catch (e) {
+            res.status(400).send({errors: e.message});
+        }
     });
 };

@@ -123,9 +123,6 @@ $(document).ready(function() {
     });
 
     $("#coordinateForm").submit((e) => {
-        //initialize google map with new coordinates
-        initialize($("#latitude-input").val(), $("#longitude-input").val());
-
         e.preventDefault();
 
         handleCoordinateRequest();
@@ -142,6 +139,9 @@ $(document).ready(function() {
         var lonInput = lon || $("#longitude-input").val();
 
         $.post( "/address/coordinate-search", { lat: latInput, lon: lonInput }).done(function( data ) {
+            //initialize google map with new coordinates
+            initialize($("#latitude-input").val(), $("#longitude-input").val());
+
             //restore default values of charts and buttons
             restoreValues();
 
