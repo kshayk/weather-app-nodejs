@@ -81,31 +81,52 @@
         </div>
 
         <div class="col-md-12 col-sm-12" style="height: 400px; padding: 5px 0 5px 0">
-            <div id="map" class="col-md-9 col-sm-9"></div>
-            <div class="col-md-3 col-sm-3 coordinate-div">
+            <div class="col-md-3 col-sm-12 coordinate-div">
                 <br>
                 <h5>Search By Coordinates</h5>
                 <br>
                 <ul id="coordinateErrors" style="color:red; font-weight: bold; list-style-type: none;"></ul>
-                <form method="post" action="/address/coordinate-search" id="coordinateForm">
-                    <label class="sr-only" for="latitude-input">Latitude: </label>
-                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                <form method="post" action="/address/coordinate-search" id="coordinateForm" class="desktop-form">
+                    <label class="sr-only" for="latitude-input">Latitude:</label>
+                    <div class="input-group" id="latitude-div">
                         <div class="input-group-addon">Lat</div>
                         <input class="form-control" type="text" id="latitude-input" name="latitude" required>
                     </div>
-                    <br>
+                    <br class="mobile-break">
                     <label class="sr-only" for="longitude-input">Longitude:</label>
-                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                    <div class="input-group" id="longitude-div">
                         <div class="input-group-addon">Lng</div>
                         <input class="form-control" type="text" id="longitude-input" name="longitude" required>
                     </div>
                     <br>
                     <button type="submit" class="btn btn-success">Submit <i id="coordinateLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
+                    <br><br><br><br>
                 </form>
 
-                <br><br><br><br>
+                <form method="post" action="/address/coordinate-search" id="coordinateForm" class="mobile-form form-inline">
+                    <div class="row">
+                        <label class="sr-only" for="latitude-input">Latitude:</label>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">Lat</span>
+                                <input class="form-control" type="text" id="latitude-input" name="latitude" required>
+                            </div>
+                        </div>
+                        <label class="sr-only" for="longitude-input">Longitude:</label>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">Lng</span>
+                                <input class="form-control" type="text" id="longitude-input" name="longitude" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Submit <i id="coordinateLoading" style="display: none" class="fa fa-refresh ld ld-spin"></i></button>
+
+                    </div>
+                </form>
                 <small>*Move the marker inside the map to the desired location to change coordinates and search again</small>
             </div>
+            <div id="map" class="col-md-9 col-sm-12"></div>
+
         </div>
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
             <small style="color: darkgrey">Special thanks to darksky.net, openweathermap.org and newsapi.org</small>

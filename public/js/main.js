@@ -2,6 +2,12 @@ $(document).ready(function() {
     var lastGoogleMapMarkerStatus = '';
     var currentCountry = '';
 
+    if( /Android|webOS|iPhone|iPad|Mac|Macintosh|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+        $('.desktop-form').remove();
+    } else {
+        $('.mobile-form').remove();
+    }
+
     $('.chart-canvas').hide();
 
     $('#hourChart').hide();
