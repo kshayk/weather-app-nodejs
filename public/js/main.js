@@ -1,3 +1,6 @@
+const DEFAULT_LATITUDE = 40.6971494;
+const DEFAULT_LONGITUDE = -74.2598655;
+
 $(document).ready(function() {
     var lastGoogleMapMarkerStatus = '';
     var currentCountry = '';
@@ -364,10 +367,12 @@ $(document).ready(function() {
                 handleCoordinateRequest(position.coords.latitude, position.coords.longitude);
                 return initialize(position.coords.latitude, position.coords.longitude);
             }, (err) => {
-                return initialize(40.6971494, -74.2598655);
+                handleCoordinateRequest(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+                return initialize(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
             });
         } else {
-            return initialize(40.6971494, -74.2598655);
+            handleCoordinateRequest(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+            return initialize(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
         }
     }
 });
